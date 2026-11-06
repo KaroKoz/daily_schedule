@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: Day tab = tasks (left) + schedule (right). Week tab = Mon to Sun task columns with Weekly Tasks and Mindfulness Corner side by side below. Both stack on phones. */
+/* Layout: Day tab = tasks (left) + schedule (right). Week tab = Mon to Fri task columns plus a split Sat/Sun column, with Weekly Tasks and Mindfulness Corner side by side below. Month tab = calendar of scheduled events. Both stack on phones. */
 :root{
   /* Light-only by choice: white page, black text */
   color-scheme:light;
@@ -160,10 +160,66 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
 .tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent);font-weight:600}
 .wrap.week-mode{max-width:1680px}
 
+/* Up Next: reminder panel under the Day tab's Tasks panel */
+.day-left{display:flex;flex-direction:column;gap:18px;min-width:0}
+.up-day{display:flex;flex-direction:column;gap:3px;min-width:0}
+.up-open{align-self:flex-start;border:0;background:transparent;padding:0;font-family:var(--f-mono);font-size:12px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;border-radius:4px}
+.up-open:hover{text-decoration:underline}
+.up-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.up-item{display:flex;align-items:baseline;gap:7px;font-size:14px;line-height:1.3;min-width:0}
+.up-item .mark{flex:none;width:9px;height:9px;transform:translateY(1px)}
+.up-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px 24px}
+@media (max-width:520px){.up-grid{grid-template-columns:1fr}}
+.up-sec{display:flex;flex-direction:column;gap:10px;min-width:0}
+.up-sec h3{font-family:var(--f-display);font-weight:400;font-size:17px;margin:0}
+.up-item.ev .mark{border-radius:50%;background:var(--c)}
+.up-item .tm{flex:none;font-family:var(--f-mono);font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.up-item.tk .mark{border:1.5px solid var(--muted);border-radius:2px}
+.up-item .tx{min-width:0;overflow-wrap:anywhere}
+.up-none{font-size:14px;color:var(--muted);margin:0}
+
+/* Month tab: Sunday to Saturday calendar of scheduled events; becomes a list on phones */
+.month{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--line);gap:1px}
+.m-head{background:var(--soft);padding:7px 8px;font-family:var(--f-mono);font-size:12px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.m-day{background:var(--surface);min-height:124px;padding:6px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.m-day.out{background:var(--soft)}
+.m-day.out .m-open,.m-day.out .m-ev{opacity:.55}
+.m-open{align-self:flex-start;border:0;background:transparent;padding:0;display:flex;align-items:center;gap:6px;border-radius:999px}
+.m-num{min-width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-mono);font-size:13px;font-variant-numeric:tabular-nums}
+.m-open:hover .m-num{background:var(--soft)}
+.m-day.today .m-num{background:var(--accent);color:var(--surface);font-weight:600}
+.m-wd{display:none;font-family:var(--f-mono);font-size:12px;font-weight:500;letter-spacing:.08em;text-transform:uppercase}
+.m-ev{width:100%;min-width:0;border:0;border-left:3px solid var(--c);background:var(--cbg);border-radius:5px;padding:3px 6px;text-align:left;display:flex;flex-direction:column;gap:1px}
+.m-ev:hover{outline:1px solid var(--c)}
+.m-ev .tm{font-family:var(--f-mono);font-size:11px;line-height:1.2;opacity:.8;font-variant-numeric:tabular-nums}
+.m-ev .t{font-size:13px;font-weight:600;line-height:1.2;overflow-wrap:anywhere}
+.m-ev .rep{font-weight:400;opacity:.75}
+.m-legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:10px;font-size:13px;color:var(--muted)}
+.m-legend span{display:inline-flex;align-items:center;gap:6px}
+.m-legend i{width:10px;height:10px;border-radius:50%;background:var(--c)}
+.m-none{display:none}
+@media (max-width:720px){
+  .month{display:block;background:var(--surface)}
+  .m-head{display:none}
+  .m-day{min-height:0;padding:10px;border-top:1px solid var(--line)}
+  .m-day.first-shown{border-top:0}
+  .m-day.out,.m-day.no-events{display:none}
+  .m-wd{display:inline}
+  .m-none{display:block;padding:12px;margin:0}
+}
+
 /* Week tab: 7 day columns, Weekly Tasks block below */
 #weekBoard{display:flex;flex-direction:column;gap:12px;min-width:0}
 .week-scroll{overflow-x:auto;padding-bottom:2px}
-.week{display:grid;grid-template-columns:repeat(7,minmax(132px,1fr));gap:8px;align-items:stretch;min-width:972px}
+.week{display:grid;grid-template-columns:repeat(6,minmax(124px,1fr));gap:8px;align-items:stretch;min-width:784px}
+/* Saturday and Sunday share the last column, split in half. Empty categories sit on one line to fit. */
+.weekend{display:grid;grid-template-rows:1fr 1fr;gap:8px;min-width:0}
+.weekend .wcat.no-tasks{flex-direction:row;flex-wrap:wrap;align-items:center;gap:0 6px}
+.weekend .wcat.no-tasks .wcat-head{flex:1 1 0;min-width:0}
+.weekend .wcat.no-tasks .tasks{display:none}
+.weekend .wcat.no-tasks .wadd{flex:0 0 52px;border-top:0}
+.weekend .wcat.no-tasks:focus-within .wadd{flex-basis:100%;border-top:1px solid var(--line)}
+.weekend .col-body{gap:8px}
 @media (max-width:820px){.week-scroll{overflow-x:visible}.week{grid-template-columns:1fr;min-width:0}}
 .col{border:1px solid var(--line);border-radius:12px;min-width:0;display:flex;flex-direction:column;background:var(--surface)}
 .col.today{border-color:var(--accent);box-shadow:inset 0 2px 0 var(--accent)}
@@ -248,6 +304,7 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
   <div class="tabs" role="tablist" aria-label="Planner view">
     <button class="tab" role="tab" id="tabDay" data-view="day" aria-controls="dayBoard">Day</button>
     <button class="tab" role="tab" id="tabWeek" data-view="week" aria-controls="weekBoard">Week</button>
+    <button class="tab" role="tab" id="tabMonth" data-view="month" aria-controls="monthBoard">Month</button>
   </div>
   <header>
     <div class="dateblock">
@@ -266,6 +323,7 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
   <div class="notice" id="catNotice" role="status" hidden></div>
 
   <main class="board" id="dayBoard" role="tabpanel" aria-labelledby="tabDay">
+    <div class="day-left">
     <section class="panel" aria-labelledby="tasksH">
       <div class="panel-head"><h2 id="tasksH">Tasks</h2><span class="meta" id="taskTotal"></span></div>
       <div class="panel-body">
@@ -276,6 +334,12 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
         </form>
       </div>
     </section>
+
+    <section class="panel upcoming" aria-labelledby="upcomingH">
+      <div class="panel-head"><h2 id="upcomingH">Up Next</h2><span class="meta">Next 3 days</span></div>
+      <div class="panel-body" id="upcoming" style="gap:12px"></div>
+    </section>
+    </div>
 
     <section class="panel" aria-labelledby="schedH">
       <div class="panel-head"><h2 id="schedH">Schedule</h2><span class="meta" id="eventTotal"></span></div>
@@ -312,6 +376,11 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
       <div id="weeklyBlock"></div>
       <div id="mindfulBlock"></div>
     </div>
+  </main>
+
+  <main id="monthBoard" role="tabpanel" aria-labelledby="tabMonth" hidden>
+    <div class="month" id="month"></div>
+    <div class="m-legend" id="monthLegend"></div>
   </main>
 </div>
 
@@ -354,8 +423,8 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
   let editingId = null;
   let pickedColor = 'blue';
   let confirmCat = null;
-  let view = 'day';           // which tab is showing: 'day' or 'week'
-  try{ if(storeGet(PREFIX+'view')==='week') view='week'; }catch(e){}
+  let view = 'day';           // which tab is showing: 'day', 'week' or 'month'
+  try{ const v=storeGet(PREFIX+'view'); if(v==='week'||v==='month') view=v; }catch(e){}
 
   // ---------- shared categories ----------
   // One list of category names is shared by every day and every week (dayplanner:categories).
@@ -563,6 +632,17 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
     document.getElementById('todayBtn').textContent = isWeek ? 'This week' : 'Today';
     document.getElementById('prevDay').setAttribute('aria-label', isWeek ? 'Previous week' : 'Previous day');
     document.getElementById('nextDay').setAttribute('aria-label', isWeek ? 'Next week' : 'Next day');
+    if(view==='month'){
+      document.getElementById('todayBtn').textContent = 'This month';
+      document.getElementById('prevDay').setAttribute('aria-label','Previous month');
+      document.getElementById('nextDay').setAttribute('aria-label','Next month');
+      const d = fromIso(cur), now = new Date();
+      document.getElementById('dayTitle').textContent = d.toLocaleDateString(undefined,{month:'long'});
+      const months = (d.getFullYear()-now.getFullYear())*12 + d.getMonth()-now.getMonth();
+      const rel = months===0?'This month':months===1?'Next month':months===-1?'Last month':months>0?`In ${months} months`:`${-months} months ago`;
+      document.getElementById('daySub').textContent = `${d.getFullYear()} · ${rel}`;
+      return;
+    }
     if(isWeek){
       const mon = mondayOf(cur), a = fromIso(mon), b = fromIso(shift(mon,6));
       const aTxt = a.toLocaleDateString(undefined,{month:'long', day:'numeric'});
@@ -677,6 +757,7 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
     tl.innerHTML = rows + `<div class="events">${evHtml}</div>` + now;
     const n=dayEvents().length;
     document.getElementById('eventTotal').textContent = n ? `${n} event${n===1?'':'s'}` : '';
+    renderUpcoming();
   }
 
   function taskNote(e){
@@ -718,7 +799,7 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
     } else {
       head = `<span class="wcat-name" title="${esc(c.name)}">${esc(c.name)}</span>`;
     }
-    return `<div class="wcat" data-cat="${c.id}">
+    return `<div class="wcat${c.tasks.length?'':' no-tasks'}" data-cat="${c.id}">
       <div class="wcat-head">${head}</div>
       <ul class="tasks" style="border-top:0">${c.tasks.map(t=>weekTaskHtml(t,weekly)).join('')}</ul>
       ${inCats(c.name) ? `<form class="wadd" data-cat="${c.id}"><input type="text" id="wadd-${c.id}" placeholder="+ Add" aria-label="Add a task to ${esc(c.name)}" maxlength="140"></form>` : ''}
@@ -735,6 +816,7 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
     let html = '';
     for(let i=0; i<7; i++){
       const date = shift(weekMonday,i), day = loadDay(date), d = fromIso(date);
+      if(i===5) html += '<div class="weekend">';
       weekDays[date] = day;
       const wd = d.toLocaleDateString(undefined,{weekday:'short'}), full = d.toLocaleDateString(undefined,{weekday:'long', month:'long', day:'numeric'});
       html += `<section class="col${date===today?' today':''}" data-col="${date}" aria-label="${full}">
@@ -744,6 +826,7 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
         </div>
         <div class="col-body">${day.categories.length ? day.categories.map(c=>weekCatHtml(c,false)).join('') : '<p class="empty">No categories. Add one in Weekly Tasks below.</p>'}</div>
       </section>`;
+      if(i===6) html += '</div>';
     }
     document.getElementById('week').innerHTML = html;
     document.getElementById('weeklyBlock').innerHTML = `<section class="col weekly" data-col="weekly" aria-labelledby="weeklyH">
@@ -900,13 +983,85 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
     document.getElementById('mNew')?.focus();
   });
 
+  // ---------- render: up next panel ----------
+  // The three days after the day on screen, with tasks and events listed separately.
+  function renderUpcoming(){
+    let taskHtml = '', eventHtml = '';
+    for(let i=1; i<=3; i++){
+      const date = shift(cur,i), dt = fromIso(date);
+      const label = dt.toLocaleDateString(undefined,{weekday:'short', month:'short', day:'numeric'});
+      const full = dt.toLocaleDateString(undefined,{weekday:'long', month:'long', day:'numeric'});
+      const block = items => `<div class="up-day"><button class="up-open" type="button" data-date="${date}" aria-label="Open ${full}" title="Open this day">${label}</button><ul class="up-list">${items}</ul></div>`;
+      const day = readStored('day',date);
+      const tasks = ((day && day.categories) || []).flatMap(c=>c.tasks).filter(t=>!t.done && !t.movedTo);
+      const events = eventsOn(date);
+      if(tasks.length) taskHtml += block(tasks.map(t=>`<li class="up-item tk"><span class="mark"></span><span class="tx">${esc(t.text)}</span></li>`).join(''));
+      if(events.length) eventHtml += block(events.map(e=>`<li class="up-item ev" style="--c:var(--ev-${e.color||'blue'}-b)"><span class="mark" title="${COLOR_NAMES[e.color||'blue']}"></span><span class="tm">${fmt(e.start)}</span><span class="tx">${esc(e.title)}</span></li>`).join(''));
+    }
+    document.getElementById('upcoming').innerHTML = taskHtml || eventHtml
+      ? `<div class="up-grid">
+          <section class="up-sec" aria-labelledby="upTasksH"><h3 id="upTasksH">Tasks</h3>${taskHtml || '<p class="up-none">No tasks</p>'}</section>
+          <section class="up-sec" aria-labelledby="upEventsH"><h3 id="upEventsH">Events</h3>${eventHtml || '<p class="up-none">No events</p>'}</section>
+        </div>`
+      : '<p class="up-none">All clear for the next few days!</p>';
+  }
+  document.getElementById('upcoming').addEventListener('click', e=>{
+    const b = e.target.closest('[data-date]'); if(!b) return;
+    go(b.dataset.date); window.scrollTo(0,0);
+  });
+
+  // ---------- render: month tab ----------
+  // Shows scheduled events only: each day's one-time events plus weekly ones.
+  function eventsOn(date){
+    const day = readStored('day', date);
+    return [...((day && day.events) || []), ...seriesOn(date).map(r=>({...r, recurring:true}))]
+      .sort((a,b)=>toMin(a.start)-toMin(b.start) || toMin(a.end)-toMin(b.end));
+  }
+  function renderMonth(){
+    const d = fromIso(cur), y = d.getFullYear(), m = d.getMonth();
+    const first = iso(new Date(y,m,1)), last = iso(new Date(y,m+1,0));
+    const today = todayIso();
+    let html = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(n=>`<div class="m-head" aria-hidden="true">${n}</div>`).join('');
+    let shownAny = false;
+    // The month grid runs Sunday to Saturday, like a standard calendar.
+    const sundayOf = x => shift(x, -fromIso(x).getDay());
+    for(let date=sundayOf(first); date<=shift(sundayOf(last),6); date=shift(date,1)){
+      const dt = fromIso(date), evs = eventsOn(date), out = date<first || date>last;
+      const full = dt.toLocaleDateString(undefined,{weekday:'long', month:'long', day:'numeric'});
+      const firstShown = !out && evs.length && !shownAny; if(firstShown) shownAny = true;
+      html += `<div class="m-day${out?' out':''}${date===today?' today':''}${evs.length?'':' no-events'}${firstShown?' first-shown':''}">
+        <button class="m-open" type="button" data-date="${date}" aria-label="Open ${full} in the Day tab" title="Open in the Day tab"><span class="m-num">${dt.getDate()}</span><span class="m-wd">${dt.toLocaleDateString(undefined,{weekday:'short'})}</span></button>
+        ${evs.map(e=>{
+          const c = e.color||'blue';
+          return `<button class="m-ev" type="button" data-date="${date}" style="--c:var(--ev-${c}-b);--cbg:var(--ev-${c})"
+            aria-label="${COLOR_NAMES[c]}: ${esc(e.title)}, ${fmt(e.start)} to ${fmt(e.end)}${e.location?', at '+esc(e.location):''}${e.recurring?', repeats '+daysText(e.days):''}. Open ${full} in the Day tab"
+            title="${esc(e.title)} · ${fmt(e.start)} – ${fmt(e.end)}${e.location?' · '+esc(e.location):''}">
+            <span class="tm">${fmt(e.start)}</span><span class="t">${e.recurring?'<span class="rep" aria-hidden="true">↻ </span>':''}${esc(e.title)}</span></button>`;
+        }).join('')}
+      </div>`;
+    }
+    html += shownAny ? '' : '<p class="empty m-none">No events scheduled this month.</p>';
+    document.getElementById('month').innerHTML = html;
+    document.getElementById('monthLegend').innerHTML = COLORS.map(c=>`<span style="--c:var(--ev-${c}-b)"><i></i>${COLOR_NAMES[c]}</span>`).join('');
+  }
+  document.getElementById('month').addEventListener('click', e=>{
+    const b = e.target.closest('button[data-date]'); if(!b) return;
+    cur = b.dataset.date; setView('day');
+  });
+  // Move by whole months; the 31st becomes the last day of a shorter month.
+  function shiftMonth(s,n){
+    const d = fromIso(s), lastDay = new Date(d.getFullYear(), d.getMonth()+n+1, 0).getDate();
+    return iso(new Date(d.getFullYear(), d.getMonth()+n, Math.min(d.getDate(), lastDay)));
+  }
+
   // ---------- tabs ----------
   function setView(v){
-    view = v; storeSet(PREFIX+'view', v);
-    const isWeek = v==='week';
-    document.getElementById('dayBoard').hidden = isWeek;
-    document.getElementById('weekBoard').hidden = !isWeek;
-    document.getElementById('wrap').classList.toggle('week-mode', isWeek);
+    if(v!==view) storeSet(PREFIX+'view', v);   // only a real tab change is saved
+    view = v;
+    document.getElementById('dayBoard').hidden = v!=='day';
+    document.getElementById('weekBoard').hidden = v!=='week';
+    document.getElementById('monthBoard').hidden = v!=='month';
+    document.getElementById('wrap').classList.toggle('week-mode', v!=='day');
     document.querySelectorAll('.tab').forEach(t=>{
       const on = t.dataset.view===v;
       t.setAttribute('aria-selected', on);
@@ -916,6 +1071,7 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
   }
   function refresh(){
     if(view==='week'){ confirmWeekCat=null; confirmMindful=null; renderHeader(); renderWeek(); window.scrollTo(0,0); }
+    else if(view==='month'){ renderHeader(); renderMonth(); window.scrollTo(0,0); }
     else go(cur);
   }
   const tabsEl = document.querySelector('.tabs');
@@ -923,7 +1079,8 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
   tabsEl.addEventListener('keydown', e=>{
     if(e.key!=='ArrowLeft' && e.key!=='ArrowRight') return;
     e.preventDefault();
-    const next = view==='day' ? 'week' : 'day';
+    const order = ['day','week','month'];
+    const next = order[(order.indexOf(view)+(e.key==='ArrowRight'?1:2))%3];
     setView(next);
     document.querySelector(`.tab[data-view="${next}"]`).focus();
   });
@@ -1051,10 +1208,11 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
     const evs=dayEvents(); if(evs.length){ h=Math.min(h, Math.floor(Math.min(...evs.map(e=>toMin(e.start)))/60)); }
     document.getElementById('tlScroll').scrollTop=(Math.max(h,START_H)-START_H)*hourPx;
   }
-  // The arrows move one day in the Day tab and one week in the Week tab.
+  // The arrows move one day, week, or month, depending on the tab.
   function jump(date){ cur=date; refresh(); }
-  prevDay.onclick=()=>jump(shift(cur, view==='week'?-7:-1));
-  nextDay.onclick=()=>jump(shift(cur, view==='week'?7:1));
+  const step = n => view==='month' ? shiftMonth(cur,n) : shift(cur, view==='week'?7*n:n);
+  prevDay.onclick=()=>jump(step(-1));
+  nextDay.onclick=()=>jump(step(1));
   todayBtn.onclick=()=>jump(todayIso());
   datePick.onchange=e=>{ if(e.target.value) jump(e.target.value); };
 
