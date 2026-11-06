@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: two-panel planner — tasks ledger (left), hour-ruled schedule (right); stacks on phones */
+/* Layout: Day tab = tasks (left) + schedule (right). Week tab = Mon to Sun task columns with Weekly Tasks and Mindfulness Corner side by side below. Both stack on phones. */
 :root{
   /* Light-only by choice: white page, black text */
   color-scheme:light;
@@ -24,7 +24,8 @@
   --hour:56px;
 }
 *{box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.45;
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.45;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 40px}
 .wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
 button,input,select{font:inherit;color:inherit}
@@ -43,7 +44,7 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
 .btn.ghost:hover{color:var(--ink);border-color:var(--line)}
 .nav input[type=date]{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:6px 8px;font-family:var(--f-mono);font-size:13px}
 
-.notice{display:flex;flex-wrap:wrap;align-items:center;gap:10px;justify-content:space-between;background:var(--soft);border:1px dashed var(--line);border-radius:10px;padding:10px 14px;font-size:14px;color:var(--muted)}
+.notice{position:sticky;top:8px;z-index:5;display:flex;flex-wrap:wrap;align-items:center;gap:10px;justify-content:space-between;background:var(--soft);border:1px solid var(--muted);border-radius:10px;padding:10px 14px;font-size:14px;color:var(--ink)}
 
 /* Panels */
 .board{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
@@ -73,9 +74,27 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
 .task input[type=checkbox]:checked{background:var(--accent);border-color:var(--accent)}
 .task input[type=checkbox]:checked::after{content:"";width:9px;height:5px;border:2px solid var(--surface);border-top:0;border-right:0;transform:rotate(-45deg) translate(1px,-1px)}
 .task .text{overflow-wrap:anywhere}
+.task{flex-wrap:wrap}
+.link-row{flex-basis:100%;padding-left:28px;display:flex;align-items:center;gap:6px;margin-top:-2px}
+.ev-chip{display:inline-flex;align-items:center;gap:6px;max-width:100%;border:0;border-left:3px solid var(--c);background:var(--cbg);border-radius:5px;padding:2px 8px;font-size:12px;text-align:left}
+.ev-chip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.ev-chip .when{font-family:var(--f-mono);font-size:11px;opacity:.8;flex:none}
+.ev-chip:hover{outline:1px solid var(--c)}
+.task.done .ev-chip{opacity:.6}
+.link-row select{font-size:13px;border:1px solid var(--line);border-radius:6px;padding:4px 6px;background:var(--surface);max-width:100%;min-width:0}
+.icon-btn svg{width:15px;height:15px}
 .carry{font-family:var(--f-mono);font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:4px;padding:0 5px;margin-left:6px;white-space:nowrap}
 .event .loc{font-size:11px;opacity:.85;overflow-wrap:anywhere}
 .ev-form .loc-field{grid-column:1/-1}
+.repeat-row{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px 18px}
+.flabel{font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.days{display:flex;gap:4px}
+.day{width:32px;height:32px;border-radius:50%;border:1px solid var(--line);background:var(--surface);font-size:13px;font-weight:500;padding:0}
+.day:hover{border-color:var(--muted)}
+.day[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--surface)}
+.rep-hint{font-size:13px;color:var(--muted);flex-basis:100%;margin:-4px 0 0}
+.ev-form input[type=date]{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:6px 8px;font-family:var(--f-mono);font-size:13px}
+.event .rep{font-weight:400;opacity:.75}
 .task.done .text{text-decoration:line-through;text-decoration-thickness:1.5px;color:var(--muted)}
 .task .icon-btn{opacity:0}
 .task:hover .icon-btn,.task .icon-btn:focus-visible{opacity:1}
@@ -83,6 +102,9 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
 .add-task{display:flex;gap:6px}
 .add-task input{flex:1;min-width:0;border:0;border-bottom:1px dashed var(--line);background:transparent;padding:6px 0;font-size:14px}
 .add-task input:focus{outline:none;border-bottom-color:var(--accent)}
+.add-task{flex-wrap:wrap;align-items:center}
+.add-task select{flex:0 1 auto;max-width:100%;min-width:0;font-size:13px;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:4px 6px;background:var(--surface)}
+.add-task select:focus{color:var(--ink)}
 .add-cat{display:flex;gap:8px}
 .add-cat input{flex:1;min-width:0;border:1px solid var(--line);background:var(--soft);border-radius:8px;padding:7px 10px}
 .empty{color:var(--muted);font-size:14px;margin:0}
@@ -125,17 +147,114 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
 .now-line{position:absolute;left:62px;right:0;height:0;border-top:2px solid var(--now);pointer-events:none;z-index:2}
 .now-line::before{content:"";position:absolute;left:-5px;top:-6px;width:10px;height:10px;border-radius:50%;background:var(--now)}
 @media (prefers-reduced-motion:no-preference){.task .text{transition:color .2s}}
+
+/* Tasks that have moved forward to a later day or week */
+.task.moved .text{color:var(--muted)}
+.task.moved input[type=checkbox]{border-style:dashed;cursor:default;opacity:.6}
+.task.moved label{cursor:default}
+
+/* Day / Week tabs */
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line)}
+.tab{border:0;background:transparent;padding:8px 14px;margin-bottom:-1px;border-bottom:2px solid transparent;font-size:15px;font-weight:500;color:var(--muted)}
+.tab:hover{color:var(--ink)}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent);font-weight:600}
+.wrap.week-mode{max-width:1680px}
+
+/* Week tab: 7 day columns, Weekly Tasks block below */
+#weekBoard{display:flex;flex-direction:column;gap:12px;min-width:0}
+.week-scroll{overflow-x:auto;padding-bottom:2px}
+.week{display:grid;grid-template-columns:repeat(7,minmax(132px,1fr));gap:8px;align-items:stretch;min-width:972px}
+@media (max-width:820px){.week-scroll{overflow-x:visible}.week{grid-template-columns:1fr;min-width:0}}
+.col{border:1px solid var(--line);border-radius:12px;min-width:0;display:flex;flex-direction:column;background:var(--surface)}
+.col.today{border-color:var(--accent);box-shadow:inset 0 2px 0 var(--accent)}
+.col.weekly{background:var(--soft)}
+.col-head{display:flex;align-items:baseline;justify-content:space-between;gap:6px;padding:10px;border-bottom:1px solid var(--line)}
+.col-open{border:0;background:transparent;padding:0;display:flex;align-items:baseline;gap:6px;text-align:left;border-radius:4px}
+.col-open:hover .col-day{text-decoration:underline}
+.col-day{font-family:var(--f-mono);font-size:12px;font-weight:500;letter-spacing:.1em;text-transform:uppercase}
+.col-num{font-family:var(--f-display);font-size:21px;line-height:1}
+.col.today .col-num,.col.today .col-day{color:var(--accent)}
+.col-title{font-family:var(--f-display);font-weight:400;font-size:19px;line-height:1.15;margin:0}
+.col-meta{font-family:var(--f-mono);font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.col-body{padding:10px;display:flex;flex-direction:column;gap:14px;flex:1}
+.wcat{display:flex;flex-direction:column;gap:2px;min-width:0}
+.wcat-head{display:flex;align-items:center;gap:2px;min-height:24px}
+.wcat-name{flex:1;min-width:0;font-family:var(--f-mono);font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wcat .cat-name{font-size:11px;letter-spacing:.08em;margin-left:-4px;padding:2px 4px}
+.wcat .icon-btn{width:22px;height:22px;font-size:13px}
+.wcat .confirm{flex-wrap:wrap;gap:6px}
+.wcat .confirm .btn{padding:3px 8px;font-size:13px}
+.wtask{position:relative;display:flex;align-items:flex-start;gap:6px;padding:5px 0;border-top:1px solid var(--line);font-size:14px;line-height:1.3}
+.wtask label{display:flex;align-items:flex-start;gap:6px;flex:1;min-width:0;cursor:pointer}
+.wtask input[type=checkbox]{appearance:none;flex:none;width:16px;height:16px;margin:1px 0 0;border:1.5px solid var(--muted);border-radius:4px;display:grid;place-items:center;cursor:pointer;background:var(--surface)}
+.wtask input[type=checkbox]:checked{background:var(--accent);border-color:var(--accent)}
+.wtask input[type=checkbox]:checked::after{content:"";width:8px;height:4px;border:2px solid var(--surface);border-top:0;border-right:0;transform:rotate(-45deg) translate(1px,-1px)}
+.wtask .text{min-width:0;overflow-wrap:anywhere}
+.wtask.done .text{text-decoration:line-through;text-decoration-thickness:1.5px;color:var(--muted)}
+.wtask.moved .text{color:var(--muted)}
+.wtask.moved input[type=checkbox]{border-style:dashed;cursor:default;opacity:.6}
+.wtask.moved label{cursor:default}
+.wtask .carry{display:block;width:max-content;max-width:100%;margin:3px 0 0;white-space:normal;text-decoration:none}
+.wtask .icon-btn{position:absolute;top:3px;right:0;width:22px;height:22px;font-size:13px;background:var(--surface);opacity:0}
+.col.weekly .wtask .icon-btn{background:var(--soft)}
+.wtask:hover .icon-btn,.wtask .icon-btn:focus-visible{opacity:1}
+@media (hover:none){.wtask{padding-right:24px}.wtask .icon-btn{opacity:.6}}
+.wadd{border-top:1px solid var(--line)}
+.wadd input{width:100%;border:0;background:transparent;padding:5px 0;font-size:13px;min-width:0}
+.wadd input:focus{outline:none;box-shadow:0 1px 0 var(--accent)}
+.week-lower{display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:stretch}
+@media (max-width:820px){.week-lower{grid-template-columns:1fr}}
+#weeklyBlock,#mindfulBlock{display:flex;min-width:0}
+#weeklyBlock>.col,#mindfulBlock>.col{flex:1}
+.mindful .col-head{flex-wrap:wrap;padding:12px 14px;min-height:60px;align-items:center}
+.mindful .empty{padding:12px 14px}
+.stars-grid{padding:8px 14px 14px;display:flex;flex-direction:column}
+.star-row{display:grid;grid-template-columns:minmax(0,1fr) repeat(7,30px) 24px;align-items:center;column-gap:2px;min-height:40px;border-top:1px solid var(--line)}
+.star-row.head{min-height:24px;border-top:0}
+.star-row .confirm{grid-column:1/-1;flex-wrap:wrap;padding:6px 0}
+.star-row .confirm .btn{padding:3px 8px;font-size:13px}
+.star-letter{font-family:var(--f-mono);font-size:11px;font-weight:500;color:var(--muted);text-align:center}
+.star-letter.today{color:var(--accent)}
+.mind-name{min-width:0;width:100%;border:1px solid transparent;background:transparent;border-radius:6px;padding:3px 6px;margin-left:-6px;font-size:14px}
+.mind-name:hover{border-color:var(--line)}
+.mind-name:focus{border-color:var(--accent);outline:none;background:var(--soft)}
+.star{width:30px;height:30px;padding:0;border:0;background:transparent;border-radius:6px;display:grid;place-items:center;color:var(--muted)}
+.star svg{width:20px;height:20px;fill:transparent;stroke:currentColor;stroke-width:1.6;stroke-linejoin:round}
+.star:hover:not(:disabled){background:var(--soft);color:var(--ev-gold-b)}
+.star[aria-pressed="true"]{color:var(--ev-gold-b)}
+.star[aria-pressed="true"] svg{fill:var(--ev-gold-b)}
+.star:disabled{cursor:default;opacity:.3}
+.star-row .icon-btn{width:24px;height:24px;font-size:13px}
+@media (max-width:520px){
+  .star-row{grid-template-columns:repeat(7,minmax(0,1fr)) 24px;padding-bottom:4px}
+  .star-row .mind-name{grid-column:1/8;margin-left:0}
+  .star-row .icon-btn{grid-column:8;grid-row:1}
+  .star-row .star{justify-self:center}
+  .star-row.head .spacer{display:none}
+}
+.col.weekly .col-head{flex-wrap:wrap;align-items:center;padding:12px 14px}
+.weekly-title{display:flex;align-items:baseline;gap:10px}
+.weekly-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px 28px;padding:12px 14px 14px}
+.wadd-cat{display:flex;gap:6px;min-width:0}
+.wadd-cat input{flex:1 1 170px;min-width:0;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:6px 8px;font-size:13px}
+.wadd-cat .btn{font-size:13px;padding:5px 10px;white-space:nowrap}
+@media (max-width:520px){.wadd-cat{flex-basis:100%}}
 </style>
 </head>
 <body>
 
-<div class="wrap">
+
+<div class="wrap" id="wrap">
+  <div class="tabs" role="tablist" aria-label="Planner view">
+    <button class="tab" role="tab" id="tabDay" data-view="day" aria-controls="dayBoard">Day</button>
+    <button class="tab" role="tab" id="tabWeek" data-view="week" aria-controls="weekBoard">Week</button>
+  </div>
   <header>
     <div class="dateblock">
       <h1 id="dayTitle">Saturday, October 31</h1>
       <div class="sub" id="daySub">2026 · Today</div>
     </div>
-    <nav class="nav" aria-label="Choose a day">
+    <nav class="nav" aria-label="Choose a date">
       <button class="btn" id="prevDay" aria-label="Previous day">←</button>
       <button class="btn" id="todayBtn">Today</button>
       <button class="btn" id="nextDay" aria-label="Next day">→</button>
@@ -144,7 +263,9 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
   </header>
 
 
-  <main class="board">
+  <div class="notice" id="catNotice" role="status" hidden></div>
+
+  <main class="board" id="dayBoard" role="tabpanel" aria-labelledby="tabDay">
     <section class="panel" aria-labelledby="tasksH">
       <div class="panel-head"><h2 id="tasksH">Tasks</h2><span class="meta" id="taskTotal"></span></div>
       <div class="panel-body">
@@ -163,10 +284,16 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
         <div class="field"><label for="evStart">Start</label><input id="evStart" type="time" step="300" value="09:00"></div>
         <div class="field"><label for="evEnd">End</label><input id="evEnd" type="time" step="300" value="10:00"></div>
         <div class="field loc-field"><label for="evLoc">Where (optional)</label><input id="evLoc" type="text" placeholder="e.g. Room 101" maxlength="80"></div>
+        <div class="repeat-row">
+          <div class="field"><span class="flabel" id="repLbl">Repeat on</span><div class="days" role="group" aria-labelledby="repLbl" id="repeatDays"></div></div>
+          <div class="field" id="untilField" hidden><label for="evUntil">Until (optional)</label><input id="evUntil" type="date"></div>
+          <p class="rep-hint" id="repHint">One time only. Pick days to make it repeat weekly.</p>
+        </div>
         <div class="ev-row2">
           <div class="swatches" role="group" aria-label="Color" id="swatches"></div>
           <div class="ev-actions">
             <button class="btn ghost" type="button" id="evCancel" hidden>Cancel</button>
+            <button class="btn ghost" type="button" id="evSkip" hidden>Delete this day only</button>
             <button class="btn ghost" type="button" id="evDelete" hidden>Delete</button>
             <button class="btn primary" type="submit" id="evSubmit">Add to schedule</button>
           </div>
@@ -177,6 +304,14 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
         <div class="timeline" id="timeline"></div>
       </div>
     </section>
+  </main>
+
+  <main id="weekBoard" role="tabpanel" aria-labelledby="tabWeek" hidden>
+    <div class="week-scroll"><div class="week" id="week"></div></div>
+    <div class="week-lower">
+      <div id="weeklyBlock"></div>
+      <div id="mindfulBlock"></div>
+    </div>
   </main>
 </div>
 
@@ -191,10 +326,12 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
   // ---------- storage ----------
   function storeGet(k){ try{ const v = localStorage.getItem(k); if(v!==null) return v; }catch(e){} return mem[k] ?? null; }
   function storeSet(k,v){ mem[k]=v; try{ localStorage.setItem(k,v); }catch(e){} }
-  function storedDates(){
-    const out = new Set(Object.keys(mem).filter(k=>k.startsWith(PREFIX+'day:')));
-    try{ for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k && k.startsWith(PREFIX+'day:')) out.add(k);} }catch(e){}
-    return [...out].map(k=>k.slice((PREFIX+'day:').length)).sort();
+  // kind is 'day' for saved days or 'week' for saved Weekly Tasks lists
+  function storedDates(kind='day'){
+    const pre = PREFIX+kind+':';
+    const out = new Set(Object.keys(mem).filter(k=>k.startsWith(pre)));
+    try{ for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k && k.startsWith(pre)) out.add(k);} }catch(e){}
+    return [...out].map(k=>k.slice(pre.length)).sort();
   }
 
   // ---------- dates ----------
@@ -202,6 +339,7 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
   const fromIso = s => { const [y,m,d]=s.split('-').map(Number); return new Date(y,m-1,d); };
   const todayIso = () => iso(new Date());
   const shift = (s,n) => { const d=fromIso(s); d.setDate(d.getDate()+n); return iso(d); };
+  const mondayOf = s => shift(s, -((fromIso(s).getDay()+6)%7));   // weeks run Monday to Sunday
 
   // ---------- helpers ----------
   const uid = () => Math.random().toString(36).slice(2,10);
@@ -216,55 +354,269 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
   let editingId = null;
   let pickedColor = 'blue';
   let confirmCat = null;
+  let view = 'day';           // which tab is showing: 'day' or 'week'
+  try{ if(storeGet(PREFIX+'view')==='week') view='week'; }catch(e){}
 
-  // New day: copy categories from the closest earlier saved day.
-  // Unchecked tasks from that day roll over; checked ones stay behind.
-  function blankDay(date){
-    const dates = storedDates();
-    const earlier = dates.filter(d=>d<date);
-    const src = earlier.length ? earlier[earlier.length-1] : dates[dates.length-1];
-    const rollTasks = earlier.length > 0;   // only roll forward in time, never backward
-    let srcDay = null;
-    if(src){ try{ srcDay = JSON.parse(storeGet(PREFIX+'day:'+src)); }catch(e){} }
-    if(!srcDay || !srcDay.categories || !srcDay.categories.length){
-      return {categories:['School','Work','Personal'].map(n=>({id:uid(), name:n, tasks:[]})), events:[]};
-    }
-    return {
-      categories: srcDay.categories.map(c=>({
-        id:uid(), name:c.name,
-        tasks: rollTasks ? c.tasks.filter(t=>!t.done).map(t=>({id:uid(), text:t.text, done:false, from:t.from||src})) : []
-      })),
-      events:[]
+  // ---------- shared categories ----------
+  // One list of category names is shared by every day and every week (dayplanner:categories).
+  // Days and weeks still store their own tasks, grouped under those names.
+  let catNames = [];
+  const sameName = (a,b) => a.trim().toLowerCase()===b.trim().toLowerCase();
+  const inCats = name => catNames.some(n=>sameName(n,name));
+  function saveCats(){ storeSet(PREFIX+'categories', JSON.stringify(catNames)); }
+  function readStored(kind, date){ try{ return JSON.parse(storeGet(PREFIX+kind+':'+date)); }catch(e){ return null; } }
+  // First run: start from the latest day and week, plus Creative.
+  function initCats(){
+    const raw = storeGet(PREFIX+'categories');
+    if(raw){ try{ catNames = JSON.parse(raw); return; }catch(e){} }
+    const today = todayIso(), thisWeek = mondayOf(today), names = [];
+    const add = n => { if(n && !names.some(x=>sameName(x,n))) names.push(n); };
+    const addFrom = (kind, limit) => {
+      const dates = storedDates(kind), upTo = dates.filter(d=>d<=limit);
+      const latest = upTo.length ? readStored(kind, upTo[upTo.length-1]) : null;
+      (latest?.categories||[]).forEach(c=>add(c.name));
+      // anything planned ahead keeps its category
+      dates.filter(d=>d>limit).forEach(d=>(readStored(kind,d)?.categories||[]).forEach(c=>{ if(c.tasks.length) add(c.name); }));
     };
+    addFrom('day', today);
+    addFrom('week', thisWeek);
+    if(!names.length) ['School','Work','Personal'].forEach(add);
+    add('Creative');
+    catNames = names;
+    saveCats();
   }
+  // Put a saved day or week in the shared order. A category that is no longer shared
+  // stays only if it still holds tasks (earlier days keep their history).
+  function fitCats(obj){
+    const old = obj.categories || [], used = new Set();
+    const shared = catNames.map(n=>{
+      const c = old.find(x=>!used.has(x) && sameName(x.name,n));
+      if(c){ used.add(c); return {...c, name:n}; }
+      return {id:uid(), name:n, tasks:[]};
+    });
+    obj.categories = [...shared, ...old.filter(c=>!used.has(c) && c.tasks.length)];
+    return obj;
+  }
+  function eachStored(fn){
+    ['day','week'].forEach(kind=>storedDates(kind).forEach(date=>{
+      const obj = readStored(kind,date);
+      if(obj && obj.categories && fn(kind,date,obj)) storeSet(PREFIX+kind+':'+date, JSON.stringify(obj));
+    }));
+  }
+  const isPast = (kind,date) => kind==='day' ? date<todayIso() : date<mondayOf(todayIso());
+  let noticeTimer = null;
+  function notify(text){
+    const el = document.getElementById('catNotice');
+    el.textContent = text; el.hidden = false;
+    clearTimeout(noticeTimer); noticeTimer = setTimeout(()=>{ el.hidden = true; }, 5000);
+  }
+  function addCategory(name){
+    const v = name.trim(); if(!v) return false;
+    if(inCats(v)){ notify(`You already have a category called “${v}”.`); return false; }
+    catNames.push(v); saveCats(); return true;
+  }
+  function renameCategory(oldName, name){
+    const v = name.trim(); if(!v || v===oldName) return;
+    if(inCats(v) && !sameName(v,oldName)){ notify(`You already have a category called “${v}”.`); return; }
+    catNames = catNames.map(n=>sameName(n,oldName) ? v : n); saveCats();
+    eachStored((kind,date,obj)=>{
+      let changed = false;
+      obj.categories.forEach(c=>{ if(sameName(c.name,oldName)){ c.name=v; changed=true; } });
+      return changed;
+    });
+  }
+  // Tasks a delete would remove: today and later, this week and later.
+  function tasksToDelete(name){
+    let n = 0;
+    eachStored((kind,date,obj)=>{
+      if(!isPast(kind,date)) obj.categories.forEach(c=>{ if(sameName(c.name,name)) n+=c.tasks.length; });
+      return false;
+    });
+    return n;
+  }
+  function deleteCategory(name){
+    catNames = catNames.filter(n=>!sameName(n,name)); saveCats();
+    eachStored((kind,date,obj)=>{
+      const before = obj.categories.length;
+      obj.categories = obj.categories.filter(c=>{
+        if(!sameName(c.name,name)) return true;
+        if(!isPast(kind,date) || !c.tasks.length) return false;
+        c.tasks.forEach(t=>{ if(!t.done) t.rollSkip=true; });   // history stays, but won't roll forward
+        return true;
+      });
+      return obj.categories.length!==before || isPast(kind,date);
+    });
+  }
+  function deleteMessage(name){
+    const n = tasksToDelete(name);
+    return `Delete “${esc(name)}” from every day and week? This removes ${n} task${n===1?'':'s'} from today onward. Earlier days keep theirs.`;
+  }
+
+  // New day: the shared categories with no tasks yet.
+  // Unfinished tasks arrive through rollDays() below once a new day actually starts.
+  function blankDay(){ return fitCats({categories:[], events:[]}); }
   const shortDate = s => fromIso(s).toLocaleDateString(undefined,{month:'short', day:'numeric'});
 
   function loadDay(date){
     const raw = storeGet(PREFIX+'day:'+date);
-    if(raw){ try{ return JSON.parse(raw); }catch(e){} }
-    return blankDay(date);
+    if(raw){ try{ return fitCats(JSON.parse(raw)); }catch(e){} }
+    return blankDay();
   }
   function save(){ storeSet(PREFIX+'day:'+cur, JSON.stringify(state)); }
 
+  // ---------- recurring events ----------
+  // Weekly events are stored once, in their own list, not inside each day.
+  // Each one: {id, title, start, end, color, location, days:[0-6], from:'YYYY-MM-DD', until:'YYYY-MM-DD' or '', skip:[dates]}
+  // days uses JavaScript's numbering: 0 = Sunday, 1 = Monday ... 6 = Saturday.
+  const DAY_LETTERS = ['S','M','T','W','T','F','S'];
+  const DAY_NAMES = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const DAY_ORDER = [1,2,3,4,5,6,0];   // show Monday first
+  function loadSeries(){ try{ return JSON.parse(storeGet(PREFIX+'recurring')) || []; }catch(e){ return []; } }
+  function saveSeries(){ storeSet(PREFIX+'recurring', JSON.stringify(series)); }
+  let series = loadSeries();
+  function seriesOn(date){
+    const wd = fromIso(date).getDay();
+    return series.filter(r => r.days.includes(wd) && date >= r.from && (!r.until || date <= r.until) && !(r.skip||[]).includes(date));
+  }
+  // Everything on the schedule for the current day: one-time events plus weekly ones.
+  function dayEvents(){ return [...state.events, ...seriesOn(cur).map(r => ({...r, recurring:true}))]; }
+  function daysText(days){
+    const sorted = DAY_ORDER.filter(d => days.includes(d));
+    if(sorted.length === 7) return 'every day';
+    if(sorted.join() === '1,2,3,4,5') return 'every weekday';
+    const names = sorted.map(d => DAY_NAMES[d]);
+    return 'every ' + (names.length > 1 ? names.slice(0,-1).join(', ') + ' and ' + names[names.length-1] : names[0]);
+  }
+
+  // ---------- rollover ----------
+  // A task moves forward once: the copy lands on today (or this week), and the original
+  // stays where it was, marked movedTo so it shows as moved instead of as a second to-do.
+  function addToCategory(target, name, task){
+    let c = target.categories.find(x=>sameName(x.name,name));
+    if(!c){
+      c = {id:uid(), name, tasks:[]}; target.categories.push(c);
+      if(!inCats(name)){ catNames.push(name); saveCats(); }
+    }
+    c.tasks.push(task);
+  }
+  function rollDays(){
+    const today = todayIso();
+    const dates = storedDates('day');
+    const earlier = dates.filter(d=>d<today);
+    const read = d => { try{ return JSON.parse(storeGet(PREFIX+'day:'+d)); }catch(e){ return null; } };
+    // First run of this version: older days followed the previous rule (a day's tasks were
+    // copied when the next day was first opened), so only the latest one can still roll.
+    if(!storeGet(PREFIX+'rollV2')){
+      const keep = dates.includes(today) ? null : earlier[earlier.length-1];
+      earlier.filter(d=>d!==keep).forEach(d=>{
+        const day = read(d); if(!day || !day.categories) return;
+        day.categories.forEach(c=>c.tasks.forEach(t=>{ if(!t.done) t.rollSkip=true; }));
+        storeSet(PREFIX+'day:'+d, JSON.stringify(day));
+      });
+      storeSet(PREFIX+'rollV2','1');
+    }
+    let target = null;
+    earlier.forEach(d=>{
+      const day = read(d); if(!day || !day.categories) return;
+      let changed = false;
+      day.categories.forEach(c=>c.tasks.forEach(t=>{
+        if(t.done || t.movedTo || t.rollSkip) return;
+        target = target || loadDay(today);
+        addToCategory(target, c.name, {id:uid(), text:t.text, done:false, from:t.from||d,
+          eventId: seriesOn(today).some(r=>r.id===t.eventId) ? t.eventId : undefined});
+        t.movedTo = today; changed = true;
+      }));
+      if(changed) storeSet(PREFIX+'day:'+d, JSON.stringify(day));
+    });
+    if(target) storeSet(PREFIX+'day:'+today, JSON.stringify(target));
+  }
+
+  // ---------- Weekly Tasks data ----------
+  // Stored per week under dayplanner:week:<that week's Monday>, as {categories:[...]}.
+  function loadWeek(monday){
+    const raw = storeGet(PREFIX+'week:'+monday);
+    if(raw){ try{ return fitCats(JSON.parse(raw)); }catch(e){} }
+    return fitCats({categories:[]});
+  }
+  function rollWeeks(){
+    const thisWeek = mondayOf(todayIso());
+    let target = null;
+    storedDates('week').filter(w=>w<thisWeek).forEach(w=>{
+      let wk; try{ wk = JSON.parse(storeGet(PREFIX+'week:'+w)); }catch(e){ return; }
+      if(!wk || !wk.categories) return;
+      let changed = false;
+      wk.categories.forEach(c=>c.tasks.forEach(t=>{
+        if(t.done || t.movedTo || t.rollSkip) return;
+        target = target || loadWeek(thisWeek);
+        addToCategory(target, c.name, {id:uid(), text:t.text, done:false, from:t.from||w});
+        t.movedTo = thisWeek; changed = true;
+      }));
+      if(changed) storeSet(PREFIX+'week:'+w, JSON.stringify(wk));
+    });
+    if(target) storeSet(PREFIX+'week:'+thisWeek, JSON.stringify(target));
+  }
+
   // ---------- render: header ----------
   function renderHeader(){
+    document.getElementById('datePick').value = cur;
+    const isWeek = view==='week';
+    document.getElementById('todayBtn').textContent = isWeek ? 'This week' : 'Today';
+    document.getElementById('prevDay').setAttribute('aria-label', isWeek ? 'Previous week' : 'Previous day');
+    document.getElementById('nextDay').setAttribute('aria-label', isWeek ? 'Next week' : 'Next day');
+    if(isWeek){
+      const mon = mondayOf(cur), a = fromIso(mon), b = fromIso(shift(mon,6));
+      const aTxt = a.toLocaleDateString(undefined,{month:'long', day:'numeric'});
+      const bTxt = a.getMonth()===b.getMonth() ? String(b.getDate()) : b.toLocaleDateString(undefined,{month:'long', day:'numeric'});
+      document.getElementById('dayTitle').textContent = `${aTxt} – ${bTxt}`;
+      const weeks = Math.round((a - fromIso(mondayOf(todayIso())))/(7*86400000));
+      const rel = weeks===0?'This week':weeks===1?'Next week':weeks===-1?'Last week':weeks>0?`In ${weeks} weeks`:`${-weeks} weeks ago`;
+      document.getElementById('daySub').textContent = `${b.getFullYear()} · ${rel}`;
+      return;
+    }
     const d = fromIso(cur);
     document.getElementById('dayTitle').textContent = d.toLocaleDateString(undefined,{weekday:'long', month:'long', day:'numeric'});
     const diff = Math.round((d - fromIso(todayIso()))/86400000);
     const rel = diff===0?'Today':diff===1?'Tomorrow':diff===-1?'Yesterday':diff>0?`In ${diff} days`:`${-diff} days ago`;
     document.getElementById('daySub').textContent = `${d.getFullYear()} · ${rel}`;
-    document.getElementById('datePick').value = cur;
+  }
+
+  // ---------- task ↔ event links ----------
+  // A task can carry an eventId pointing at one of the day's events (one-time or weekly).
+  let linkingTask = null;   // id of the task whose event picker is open
+  const LINK_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.5-1.5"/></svg>';
+  const sortedEvents = () => dayEvents().sort((a,b)=>toMin(a.start)-toMin(b.start));
+  const linkedEvent = t => t.eventId ? dayEvents().find(e=>e.id===t.eventId) : null;
+  const tasksFor = evId => state.categories.flatMap(c=>c.tasks).filter(t=>t.eventId===evId && !t.movedTo);
+  function linkRow(c,t){
+    const ids = `data-cat="${c.id}" data-task="${t.id}"`;
+    if(linkingTask===t.id){
+      const evs = sortedEvents();
+      const opts = evs.length
+        ? `<option value="">No event</option>` + evs.map(e=>`<option value="${e.id}" ${e.id===t.eventId?'selected':''}>${fmt(e.start)} · ${esc(e.title)}</option>`).join('')
+        : `<option value="">No events on this day yet</option>`;
+      return `<div class="link-row"><select data-act="link" ${ids} id="link-${t.id}" aria-label="Link this task to an event">${opts}</select>
+        <button class="btn ghost" type="button" data-act="link-close" ${ids}>Done</button></div>`;
+    }
+    const ev = linkedEvent(t);
+    if(!ev) return '';
+    return `<div class="link-row"><button type="button" class="ev-chip" data-act="link-open" ${ids} style="--c:var(--ev-${ev.color||'blue'}-b);--cbg:var(--ev-${ev.color||'blue'})" title="Change or remove the linked event" aria-label="Linked to ${esc(ev.title)} at ${fmt(ev.start)}. Change">
+      <span>${esc(ev.title)}</span><span class="when">${fmt(ev.start)}</span></button></div>`;
   }
 
   // ---------- render: tasks ----------
   function renderTasks(){
     const box = document.getElementById('cats');
     let total=0, done=0;
+    // event choices for the "add a task" pickers
+    const evOpts = sortedEvents().map(e=>`<option value="${e.id}">${fmt(e.start)} · ${esc(e.title)}</option>`).join('');
     if(!state.categories.length){ box.innerHTML = '<p class="empty">No categories yet. Add one below to start listing tasks.</p>'; }
     else box.innerHTML = state.categories.map(c=>{
-      const n=c.tasks.length, k=c.tasks.filter(t=>t.done).length; total+=n; done+=k;
-      const head = confirmCat===c.id
-        ? `<div class="confirm">Delete “${esc(c.name)}” and its ${n} task${n===1?'':'s'}?
+      const live=c.tasks.filter(t=>!t.movedTo), n=live.length, k=live.filter(t=>t.done).length; total+=n; done+=k;
+      const shared = inCats(c.name);
+      const head = !shared
+        ? `<span class="cat-name" title="No longer in your category list. Kept here for this day's history." style="border:0">${esc(c.name)}</span><span class="cat-count">${k} of ${n} done</span>`
+        : confirmCat===c.id
+        ? `<div class="confirm" style="flex-wrap:wrap">${deleteMessage(c.name)}
              <button class="btn yes" data-act="cat-del-yes" data-cat="${c.id}">Delete</button>
              <button class="btn" data-act="cat-del-no">Keep</button></div>`
         : `<input class="cat-name" value="${esc(c.name)}" data-act="cat-rename" data-cat="${c.id}" aria-label="Category name" maxlength="40">
@@ -273,13 +625,16 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
       return `<div class="cat">
         <div class="cat-head">${head}</div>
         <ul class="tasks">${c.tasks.map(t=>`
-          <li class="task${t.done?' done':''}">
-            <label><input type="checkbox" ${t.done?'checked':''} data-act="toggle" data-cat="${c.id}" data-task="${t.id}"><span class="text">${esc(t.text)}${t.from?`<span class="carry" title="Carried over from ${shortDate(t.from)}">from ${shortDate(t.from)}</span>`:''}</span></label>
+          <li class="task${t.done?' done':''}${t.movedTo?' moved':''}">
+            <label><input type="checkbox" ${t.done?'checked':''} ${t.movedTo?'disabled':''} data-act="toggle" data-cat="${c.id}" data-task="${t.id}"><span class="text">${esc(t.text)}${t.from?`<span class="carry" title="Carried over from ${shortDate(t.from)}">from ${shortDate(t.from)}</span>`:''}${t.movedTo?`<span class="carry" title="This task moved forward. Finish it on ${shortDate(t.movedTo)}.">moved to ${shortDate(t.movedTo)}</span>`:''}</span></label>
+            ${t.movedTo || linkedEvent(t) || linkingTask===t.id ? '' : `<button class="icon-btn" data-act="link-open" data-cat="${c.id}" data-task="${t.id}" aria-label="Link to an event" title="Link to an event">${LINK_ICON}</button>`}
             <button class="icon-btn" data-act="task-del" data-cat="${c.id}" data-task="${t.id}" aria-label="Delete task" title="Delete task">✕</button>
+            ${linkRow(c,t)}
           </li>`).join('')}</ul>
-        <form class="add-task" data-cat="${c.id}">
+        ${shared ? `<form class="add-task" data-cat="${c.id}">
           <input type="text" placeholder="+ Add a task" aria-label="Add a task to ${esc(c.name)}" maxlength="140" id="add-${c.id}">
-        </form>
+          ${evOpts ? `<select id="addlink-${c.id}" aria-label="Link the new task to an event"><option value="">No event</option>${evOpts}</select>` : ''}
+        </form>` : ''}
       </div>`;
     }).join('');
     document.getElementById('taskTotal').textContent = total ? `${done}/${total} done` : '';
@@ -306,22 +661,27 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
       rows += `<div class="hour"><span class="lbl">${label}</span><div class="slot" data-hour="${h}"></div></div>`;
     }
     rows += `<div class="hour end"><span class="lbl">12 AM</span></div>`;  // closing midnight line
-    const evs = layoutEvents(state.events.map(e=>({...e})));
+    const evs = layoutEvents(dayEvents());
     const evHtml = evs.map(e=>{
       const s=Math.max(toMin(e.start),START_H*60), en=Math.min(toMin(e.end),END_H*60);
       const top=(s-START_H*60)*pxPerMin, h=Math.max((en-s)*pxPerMin-2,20);
       const w=100/e._cols, l=e._col*w;
       return `<button class="event ${e.color||'blue'}${editingId===e.id?' editing':''}" data-ev="${e.id}"
         style="top:${top}px;height:${h}px;left:calc(${l}% + 2px);width:calc(${w}% - 4px)"
-        aria-label="${COLOR_NAMES[e.color||'blue']}: ${esc(e.title)}, ${fmt(e.start)} to ${fmt(e.end)}${e.location?', at '+esc(e.location):''}. Edit"
+        aria-label="${COLOR_NAMES[e.color||'blue']}: ${esc(e.title)}, ${fmt(e.start)} to ${fmt(e.end)}${e.location?', at '+esc(e.location):''}${e.recurring?', repeats '+daysText(e.days):''}${taskNote(e)}. Edit"
         title="${esc(e.title)} · ${fmt(e.start)} – ${fmt(e.end)}${e.location?' · '+esc(e.location):''}">
-        <span class="t">${esc(e.title)}</span>${h>34?`<span class="tm">${fmt(e.start)} – ${fmt(e.end)}</span>`:''}${e.location && h>48?`<span class="loc">${esc(e.location)}</span>`:''}</button>`;
+        <span class="t">${e.recurring?'<span class="rep" aria-hidden="true">↻ </span>':''}${esc(e.title)}</span>${h>34?`<span class="tm">${fmt(e.start)} – ${fmt(e.end)}${taskNote(e)}</span>`:''}${e.location && h>48?`<span class="loc">${esc(e.location)}</span>`:''}</button>`;
     }).join('');
     let now='';
     if(cur===todayIso()){ const d=new Date(), m=d.getHours()*60+d.getMinutes(); if(m>=START_H*60 && m<END_H*60) now=`<div class="now-line" style="top:${(m-START_H*60)*pxPerMin}px" aria-hidden="true"></div>`; }
     tl.innerHTML = rows + `<div class="events">${evHtml}</div>` + now;
-    const n=state.events.length;
+    const n=dayEvents().length;
     document.getElementById('eventTotal').textContent = n ? `${n} event${n===1?'':'s'}` : '';
+  }
+
+  function taskNote(e){
+    const ts = tasksFor(e.id); if(!ts.length) return '';
+    return ` · ${ts.filter(t=>t.done).length}/${ts.length} task${ts.length===1?'':'s'}`;
   }
 
   function renderSwatches(){
@@ -330,9 +690,257 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
 
   function renderAll(){ renderHeader(); renderTasks(); renderSchedule(); renderSwatches(); }
 
+  // ---------- render: week tab ----------
+  // Columns are rebuilt from saved data on every render, so both tabs always show the same tasks.
+  let weekDays = {};          // date -> that day's data, for the seven columns on screen
+  let weekList = null;        // the Weekly Tasks data for the week on screen
+  let weekMonday = null;
+  let confirmWeekCat = null;
+
+  function weekTaskHtml(t, weekly){
+    const label = s => weekly ? `week of ${shortDate(s)}` : shortDate(s);
+    const fromTag = t.from ? `<span class="carry" title="Carried over from ${label(t.from)}">from ${weekly?'wk of ':''}${shortDate(t.from)}</span>` : '';
+    const movedTag = t.movedTo ? `<span class="carry" title="This task moved forward. Finish it in ${label(t.movedTo)}.">moved to ${weekly?'wk of ':''}${shortDate(t.movedTo)}</span>` : '';
+    return `<li class="wtask${t.done?' done':''}${t.movedTo?' moved':''}">
+      <label><input type="checkbox" ${t.done?'checked':''} ${t.movedTo?'disabled':''} data-act="w-toggle" data-task="${t.id}"><span class="text">${esc(t.text)}${fromTag}${movedTag}</span></label>
+      <button class="icon-btn" type="button" data-act="w-task-del" data-task="${t.id}" aria-label="Delete task ${esc(t.text)}" title="Delete task">✕</button>
+    </li>`;
+  }
+  function weekCatHtml(c, weekly){
+    let head;
+    if(weekly && confirmWeekCat===c.id){
+      head = `<div class="confirm">${deleteMessage(c.name)}
+        <button class="btn yes" type="button" data-act="w-cat-del-yes" data-cat="${c.id}">Delete</button>
+        <button class="btn" type="button" data-act="w-cat-del-no">Keep</button></div>`;
+    } else if(weekly && inCats(c.name)){
+      head = `<input class="cat-name" value="${esc(c.name)}" data-act="w-cat-rename" data-cat="${c.id}" aria-label="Category name" maxlength="40">
+        <button class="icon-btn" type="button" data-act="w-cat-del" data-cat="${c.id}" aria-label="Delete category ${esc(c.name)}" title="Delete category">✕</button>`;
+    } else {
+      head = `<span class="wcat-name" title="${esc(c.name)}">${esc(c.name)}</span>`;
+    }
+    return `<div class="wcat" data-cat="${c.id}">
+      <div class="wcat-head">${head}</div>
+      <ul class="tasks" style="border-top:0">${c.tasks.map(t=>weekTaskHtml(t,weekly)).join('')}</ul>
+      ${inCats(c.name) ? `<form class="wadd" data-cat="${c.id}"><input type="text" id="wadd-${c.id}" placeholder="+ Add" aria-label="Add a task to ${esc(c.name)}" maxlength="140"></form>` : ''}
+    </div>`;
+  }
+  const progress = cats => {
+    const live = cats.flatMap(c=>c.tasks).filter(t=>!t.movedTo);
+    return live.length ? `${live.filter(t=>t.done).length}/${live.length}` : '';
+  };
+  function renderWeek(){
+    weekMonday = mondayOf(cur);
+    weekList = loadWeek(weekMonday);
+    const today = todayIso();
+    let html = '';
+    for(let i=0; i<7; i++){
+      const date = shift(weekMonday,i), day = loadDay(date), d = fromIso(date);
+      weekDays[date] = day;
+      const wd = d.toLocaleDateString(undefined,{weekday:'short'}), full = d.toLocaleDateString(undefined,{weekday:'long', month:'long', day:'numeric'});
+      html += `<section class="col${date===today?' today':''}" data-col="${date}" aria-label="${full}">
+        <div class="col-head">
+          <button class="col-open" type="button" data-act="open-day" data-date="${date}" title="Open ${full} in the Day tab" aria-label="Open ${full} in the Day tab${date===today?' (today)':''}"><span class="col-day">${wd}</span><span class="col-num">${d.getDate()}</span></button>
+          <span class="col-meta">${progress(day.categories)}</span>
+        </div>
+        <div class="col-body">${day.categories.length ? day.categories.map(c=>weekCatHtml(c,false)).join('') : '<p class="empty">No categories. Add one in Weekly Tasks below.</p>'}</div>
+      </section>`;
+    }
+    document.getElementById('week').innerHTML = html;
+    document.getElementById('weeklyBlock').innerHTML = `<section class="col weekly" data-col="weekly" aria-labelledby="weeklyH">
+      <div class="col-head">
+        <div class="weekly-title"><h2 class="col-title" id="weeklyH">Weekly Tasks</h2><span class="col-meta">${progress(weekList.categories)}</span></div>
+        <form class="wadd-cat" id="wAddCat"><input type="text" id="wNewCat" placeholder="New category name" aria-label="New category name" maxlength="40"><button class="btn" type="submit">Add category</button></form>
+      </div>
+      <div class="weekly-grid">${weekList.categories.length ? weekList.categories.map(c=>weekCatHtml(c,true)).join('') : '<p class="empty">No categories yet. Add one above.</p>'}</div>
+    </section>`;
+    renderMindful();
+  }
+
+  // Save whichever column an action happened in, then redraw.
+  function saveCol(col){
+    if(col==='weekly') storeSet(PREFIX+'week:'+weekMonday, JSON.stringify(weekList));
+    else storeSet(PREFIX+'day:'+col, JSON.stringify(weekDays[col]));
+  }
+  const colData = col => col==='weekly' ? weekList : weekDays[col];
+  const colOf = el => el.closest('[data-col]')?.dataset.col;
+  function findTask(col, id){
+    for(const c of colData(col).categories){ const t=c.tasks.find(x=>x.id===id); if(t) return {c,t}; }
+    return null;
+  }
+  const weekEl = document.getElementById('weekBoard');
+  weekEl.addEventListener('change', e=>{
+    const t=e.target, col=colOf(t); if(!col) return;
+    if(t.dataset.act==='w-toggle'){ const hit=findTask(col,t.dataset.task); if(!hit) return; hit.t.done=t.checked; saveCol(col); renderWeek(); }
+    if(t.dataset.act==='w-cat-rename'){ const c=weekList.categories.find(x=>x.id===t.dataset.cat); if(c) renameCategory(c.name, t.value); renderWeek(); }
+  });
+  weekEl.addEventListener('keydown', e=>{ if(e.target.dataset.act==='w-cat-rename' && e.key==='Enter'){ e.preventDefault(); e.target.blur(); } });
+  weekEl.addEventListener('click', e=>{
+    const b=e.target.closest('button[data-act]'); if(!b) return;
+    const col=colOf(b), act=b.dataset.act;
+    if(act==='open-day'){ cur=b.dataset.date; setView('day'); return; }
+    if(act==='w-task-del'){ const hit=findTask(col,b.dataset.task); if(!hit) return; hit.c.tasks=hit.c.tasks.filter(x=>x!==hit.t); saveCol(col); renderWeek(); }
+    if(act==='w-cat-del'){ const c=weekList.categories.find(x=>x.id===b.dataset.cat); if(!c) return;
+      if(tasksToDelete(c.name)) confirmWeekCat=c.id; else deleteCategory(c.name);
+      renderWeek(); }
+    if(act==='w-cat-del-yes'){ const c=weekList.categories.find(x=>x.id===b.dataset.cat); if(c) deleteCategory(c.name); confirmWeekCat=null; renderWeek(); }
+    if(act==='w-cat-del-no'){ confirmWeekCat=null; renderWeek(); }
+  });
+  weekEl.addEventListener('submit', e=>{
+    e.preventDefault();
+    const form=e.target, col=colOf(form);
+    if(!col) return;
+    if(form.id==='wAddCat'){
+      const i=document.getElementById('wNewCat'), v=i.value.trim(); if(!v) return;
+      if(!addCategory(v)) return;
+      renderWeek();
+      const c=weekList.categories.find(x=>sameName(x.name,v));
+      if(c) document.getElementById('wadd-'+c.id)?.focus();
+      return;
+    }
+    const input=form.querySelector('input'), v=input.value.trim(); if(!v) return;
+    const c=colData(col).categories.find(x=>x.id===form.dataset.cat); if(!c) return;
+    c.tasks.push({id:uid(), text:v, done:false}); saveCol(col); renderWeek();
+    document.getElementById('wadd-'+c.id)?.focus();
+  });
+
+  // ---------- Mindfulness Corner ----------
+  // Up to 5 active categories (dayplanner:mindful, as [{id, name, from, removedFrom}]).
+  // from = the week it was added. removedFrom = the week it was deleted; earlier weeks keep it and its stars.
+  // Filled stars are saved per week (dayplanner:stars:<Monday>, as {categoryId:[dates]}).
+  const MAX_MINDFUL = 5;
+  const STAR = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.2l2.7 5.6 6.1.8-4.5 4.2 1.2 6.1-5.5-3-5.5 3 1.2-6.1-4.5-4.2 6.1-.8z"/></svg>';
+  const WEEK_LETTERS = ['M','T','W','T','F','S','S'];
+  let mindful = [];
+  try{ mindful = JSON.parse(storeGet(PREFIX+'mindful')) || []; }catch(e){}
+  let confirmMindful = null;
+  const saveMindful = () => storeSet(PREFIX+'mindful', JSON.stringify(mindful));
+  const loadStars = monday => { try{ return JSON.parse(storeGet(PREFIX+'stars:'+monday)) || {}; }catch(e){ return {}; } };
+  const activeMindful = () => mindful.filter(m=>!m.removedFrom);
+  const showsInWeek = (m, week) => (!m.from || week>=m.from) && (!m.removedFrom || week<m.removedFrom);
+  const mindfulExists = (name, exceptId) => activeMindful().some(m=>m.id!==exceptId && sameName(m.name,name));
+  // Stars that a delete would erase: this week and later. Past weeks keep theirs.
+  function starCount(id){
+    const thisWeek = mondayOf(todayIso());
+    return storedDates('stars').filter(w=>w>=thisWeek).reduce((n,w)=>n+(loadStars(w)[id]||[]).length, 0);
+  }
+  function deleteMindful(id){
+    const thisWeek = mondayOf(todayIso()), m = mindful.find(x=>x.id===id);
+    storedDates('stars').filter(w=>w>=thisWeek).forEach(w=>{ const st=loadStars(w); if(st[id]){ delete st[id]; storeSet(PREFIX+'stars:'+w, JSON.stringify(st)); } });
+    const hasHistory = storedDates('stars').some(w=>w<thisWeek && (loadStars(w)[id]||[]).length);
+    if(hasHistory) m.removedFrom = thisWeek;
+    else mindful = mindful.filter(x=>x!==m);   // no stars to keep, so nothing needs to stay
+    saveMindful();
+  }
+  function starLabel(name, date, on){
+    const when = fromIso(date).toLocaleDateString(undefined,{weekday:'long', month:'short', day:'numeric'});
+    return `${name}, ${when}: ${on?'completed':'not completed'}`;
+  }
+  function renderMindful(){
+    const today = todayIso(), stars = loadStars(weekMonday), pastWeek = weekMonday<mondayOf(today);
+    const shown = mindful.filter(m=>showsInWeek(m,weekMonday)), active = activeMindful().length;
+    const dates = Array.from({length:7},(_,i)=>shift(weekMonday,i));
+    const rows = shown.map(m=>{
+      if(confirmMindful===m.id){
+        const n = starCount(m.id);
+        return `<div class="star-row"><div class="confirm">Delete “${esc(m.name)}” from this week onward? This removes its ${n} star${n===1?'':'s'} from this week. Past weeks keep theirs.
+          <button class="btn yes" type="button" data-act="m-del-yes" data-id="${m.id}">Delete</button>
+          <button class="btn" type="button" data-act="m-del-no">Keep</button></div></div>`;
+      }
+      const filled = stars[m.id] || [];
+      return `<div class="star-row">
+        ${m.removedFrom ? `<span class="mind-name" title="${esc(m.name)}" style="border:0">${esc(m.name)}</span>` : `<input class="mind-name" value="${esc(m.name)}" data-act="m-rename" data-id="${m.id}" aria-label="Mindfulness category name" maxlength="40">`}
+        ${dates.map(d=>{
+          const on = filled.includes(d), future = d>today;
+          return `<button class="star" type="button" data-act="m-star" data-id="${m.id}" data-date="${d}" aria-pressed="${on}" aria-label="${esc(starLabel(m.name,d,on))}" title="${future?'You can fill this in when the day comes':esc(fromIso(d).toLocaleDateString(undefined,{weekday:'long'}))}" ${future?'disabled':''}>${STAR}</button>`;
+        }).join('')}
+        ${pastWeek ? '<span></span>' : `<button class="icon-btn" type="button" data-act="m-del" data-id="${m.id}" aria-label="Delete ${esc(m.name)}" title="Delete from this week onward">✕</button>`}
+      </div>`;
+    }).join('');
+    const head = `<div class="star-row head" aria-hidden="true"><span class="spacer"></span>${dates.map((d,i)=>`<span class="star-letter${d===today?' today':''}">${WEEK_LETTERS[i]}</span>`).join('')}<span class="spacer"></span></div>`;
+    document.getElementById('mindfulBlock').innerHTML = `<section class="col mindful" aria-labelledby="mindfulH">
+      <div class="col-head">
+        <div class="weekly-title"><h2 class="col-title" id="mindfulH">Mindfulness Corner</h2>${pastWeek ? '' : `<span class="col-meta">${active} of ${MAX_MINDFUL}</span>`}</div>
+        ${!pastWeek && active<MAX_MINDFUL ? `<form class="wadd-cat" id="mAdd"><input type="text" id="mNew" placeholder="New category name" aria-label="New mindfulness category name" maxlength="40"><button class="btn" type="submit">Add category</button></form>` : ''}
+      </div>
+      ${shown.length ? `<div class="stars-grid">${head}${rows}</div>` : `<p class="empty">${pastWeek ? 'No mindfulness categories this week.' : `Add up to ${MAX_MINDFUL} categories, then fill in a star on each day you complete one.`}</p>`}
+    </section>`;
+  }
+  const mindEl = document.getElementById('mindfulBlock');
+  mindEl.addEventListener('click', e=>{
+    const b=e.target.closest('button[data-act]'); if(!b) return;
+    const act=b.dataset.act, id=b.dataset.id;
+    if(act==='m-star'){
+      // Change the star in place so keyboard focus stays on it.
+      const st=loadStars(weekMonday), d=b.dataset.date, cur=st[id]||[], on=!cur.includes(d);
+      st[id] = on ? [...cur,d] : cur.filter(x=>x!==d);
+      storeSet(PREFIX+'stars:'+weekMonday, JSON.stringify(st));
+      b.setAttribute('aria-pressed', on);
+      b.setAttribute('aria-label', starLabel(mindful.find(m=>m.id===id).name, d, on));
+    }
+    if(act==='m-del'){ if(starCount(id)) confirmMindful=id; else deleteMindful(id); renderMindful(); }
+    if(act==='m-del-yes'){ deleteMindful(id); confirmMindful=null; renderMindful(); }
+    if(act==='m-del-no'){ confirmMindful=null; renderMindful(); }
+  });
+  mindEl.addEventListener('change', e=>{
+    const t=e.target; if(t.dataset.act!=='m-rename') return;
+    const m=mindful.find(x=>x.id===t.dataset.id), v=t.value.trim();
+    if(m && v && v!==m.name){
+      if(mindfulExists(v,m.id)) notify(`You already have a mindfulness category called “${v}”.`);
+      else { m.name=v; saveMindful(); }
+    }
+    renderMindful();
+  });
+  mindEl.addEventListener('keydown', e=>{ if(e.target.dataset.act==='m-rename' && e.key==='Enter'){ e.preventDefault(); e.target.blur(); } });
+  mindEl.addEventListener('submit', e=>{
+    e.preventDefault();
+    const v=document.getElementById('mNew').value.trim(); if(!v) return;
+    if(mindfulExists(v)){ notify(`You already have a mindfulness category called “${v}”.`); return; }
+    if(activeMindful().length>=MAX_MINDFUL) return;
+    mindful.push({id:uid(), name:v, from:mondayOf(todayIso())}); saveMindful(); renderMindful();
+    document.getElementById('mNew')?.focus();
+  });
+
+  // ---------- tabs ----------
+  function setView(v){
+    view = v; storeSet(PREFIX+'view', v);
+    const isWeek = v==='week';
+    document.getElementById('dayBoard').hidden = isWeek;
+    document.getElementById('weekBoard').hidden = !isWeek;
+    document.getElementById('wrap').classList.toggle('week-mode', isWeek);
+    document.querySelectorAll('.tab').forEach(t=>{
+      const on = t.dataset.view===v;
+      t.setAttribute('aria-selected', on);
+      t.tabIndex = on ? 0 : -1;
+    });
+    refresh();
+  }
+  function refresh(){
+    if(view==='week'){ confirmWeekCat=null; confirmMindful=null; renderHeader(); renderWeek(); window.scrollTo(0,0); }
+    else go(cur);
+  }
+  const tabsEl = document.querySelector('.tabs');
+  tabsEl.addEventListener('click', e=>{ const t=e.target.closest('[data-view]'); if(t && t.dataset.view!==view) setView(t.dataset.view); });
+  tabsEl.addEventListener('keydown', e=>{
+    if(e.key!=='ArrowLeft' && e.key!=='ArrowRight') return;
+    e.preventDefault();
+    const next = view==='day' ? 'week' : 'day';
+    setView(next);
+    document.querySelector(`.tab[data-view="${next}"]`).focus();
+  });
+
   // ---------- event form ----------
-  const f = {title:evTitle, start:evStart, end:evEnd, loc:evLoc, submit:evSubmit, cancel:evCancel, del:evDelete, msg:evMsg};
-  function resetForm(){ editingId=null; f.title.value=''; f.loc.value=''; f.submit.textContent='Add to schedule'; f.cancel.hidden=true; f.del.hidden=true; f.msg.hidden=true; pickedColor='blue'; renderSwatches(); }
+  const f = {title:evTitle, start:evStart, end:evEnd, loc:evLoc, until:evUntil, submit:evSubmit, cancel:evCancel, del:evDelete, skip:evSkip, msg:evMsg};
+  let repeatDays = [];          // weekdays picked in the form
+  let editingKind = null;       // 'one' for a one-time event, 'series' for a weekly one
+  function renderDays(){
+    document.getElementById('repeatDays').innerHTML = DAY_ORDER.map(d =>
+      `<button type="button" class="day" data-day="${d}" aria-pressed="${repeatDays.includes(d)}" aria-label="${DAY_NAMES[d]}" title="${DAY_NAMES[d]}">${DAY_LETTERS[d]}</button>`).join('');
+    document.getElementById('untilField').hidden = !repeatDays.length;
+    document.getElementById('repHint').textContent = repeatDays.length
+      ? `Repeats ${daysText(repeatDays)}${f.until.value ? ' until ' + shortDate(f.until.value) : ''}.`
+      : 'One time only. Pick days to make it repeat weekly.';
+  }
+  function resetForm(){ editingId=null; editingKind=null; repeatDays=[]; f.title.value=''; f.loc.value=''; f.until.value=''; f.submit.textContent='Add to schedule'; f.cancel.hidden=true; f.del.hidden=true; f.skip.hidden=true; f.msg.hidden=true; pickedColor='blue'; renderSwatches(); renderDays(); }
   function showMsg(t){ f.msg.textContent=t; f.msg.hidden=false; }
 
   document.getElementById('evForm').addEventListener('submit', e=>{
@@ -341,22 +949,55 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
     if(!title){ showMsg('Give the event a name.'); f.title.focus(); return; }
     if(!s||!en){ showMsg('Pick a start and end time.'); return; }
     if(toMin(en)<=toMin(s)){ showMsg('End time needs to be after the start time.'); f.end.focus(); return; }
-    const location=f.loc.value.trim();
-    if(editingId){ const ev=state.events.find(x=>x.id===editingId); Object.assign(ev,{title,start:s,end:en,color:pickedColor,location}); }
-    else state.events.push({id:uid(), title, start:s, end:en, color:pickedColor, location});
-    save(); resetForm(); renderSchedule();
+    const location=f.loc.value.trim(), until=repeatDays.length ? f.until.value : '';
+    if(until && until < cur){ showMsg('The end date needs to be today or later.'); f.until.focus(); return; }
+    const fields = {title, start:s, end:en, color:pickedColor, location};
+    if(editingKind==='series'){
+      // Editing a weekly event changes every day it appears on.
+      if(!repeatDays.length){ showMsg('Pick at least one day, or use "Delete this and following" to stop it.'); return; }
+      Object.assign(series.find(r=>r.id===editingId), fields, {days:[...repeatDays], until});
+      saveSeries();
+    } else {
+      if(editingKind==='one') state.events = state.events.filter(x=>x.id!==editingId);
+      if(repeatDays.length){ series.push({id:uid(), ...fields, days:[...repeatDays], from:cur, until, skip:[]}); saveSeries(); }
+      else state.events.push({id: editingId || uid(), ...fields});
+      save();
+    }
+    resetForm(); renderSchedule(); renderTasks();
   });
-  f.cancel.addEventListener('click', ()=>{ resetForm(); renderSchedule(); });
-  f.del.addEventListener('click', ()=>{ state.events=state.events.filter(x=>x.id!==editingId); save(); resetForm(); renderSchedule(); });
+  f.cancel.addEventListener('click', ()=>{ resetForm(); renderSchedule(); renderTasks(); });
+  f.del.addEventListener('click', ()=>{
+    if(editingKind==='series'){
+      // Stop the series from this day on; earlier days keep it.
+      const r = series.find(x=>x.id===editingId), dayBefore = shift(cur,-1);
+      if(dayBefore < r.from) series = series.filter(x=>x!==r); else r.until = dayBefore;
+      saveSeries();
+    } else { state.events=state.events.filter(x=>x.id!==editingId); save(); }
+    resetForm(); renderSchedule(); renderTasks();
+  });
+  f.skip.addEventListener('click', ()=>{
+    const r = series.find(x=>x.id===editingId); r.skip = [...(r.skip||[]), cur]; saveSeries();
+    resetForm(); renderSchedule(); renderTasks();
+  });
+  document.getElementById('repeatDays').addEventListener('click', e=>{
+    const b=e.target.closest('[data-day]'); if(!b) return; const d=Number(b.dataset.day);
+    repeatDays = repeatDays.includes(d) ? repeatDays.filter(x=>x!==d) : [...repeatDays, d];
+    renderDays();
+  });
+  f.until.addEventListener('change', renderDays);
   document.getElementById('swatches').addEventListener('click', e=>{ const b=e.target.closest('[data-color]'); if(!b) return; pickedColor=b.dataset.color; renderSwatches(); });
 
   document.getElementById('timeline').addEventListener('click', e=>{
     const ev=e.target.closest('[data-ev]');
     if(ev){
-      const x=state.events.find(z=>z.id===ev.dataset.ev); if(!x) return;
-      editingId=x.id; f.title.value=x.title; f.loc.value=x.location||''; f.start.value=x.start; f.end.value=x.end; pickedColor=x.color||'blue';
-      f.submit.textContent='Save changes'; f.cancel.hidden=false; f.del.hidden=false; f.msg.hidden=true;
-      renderSwatches(); renderSchedule(); f.title.focus(); return;
+      const x=dayEvents().find(z=>z.id===ev.dataset.ev); if(!x) return;
+      editingId=x.id; editingKind = x.recurring ? 'series' : 'one';
+      f.title.value=x.title; f.loc.value=x.location||''; f.start.value=x.start; f.end.value=x.end; pickedColor=x.color||'blue';
+      repeatDays = x.recurring ? [...x.days] : []; f.until.value = x.recurring ? (x.until||'') : '';
+      f.submit.textContent = x.recurring ? 'Save for all days' : 'Save changes';
+      f.del.textContent = x.recurring ? 'Delete this and following' : 'Delete';
+      f.cancel.hidden=false; f.del.hidden=false; f.skip.hidden=!x.recurring; f.msg.hidden=true;
+      renderSwatches(); renderDays(); renderSchedule(); f.title.focus(); return;
     }
     const slot=e.target.closest('.slot');
     if(slot){
@@ -371,46 +1012,68 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
   const findCat = id => state.categories.find(c=>c.id===id);
   cats.addEventListener('change', e=>{
     const t=e.target, c=findCat(t.dataset.cat); if(!c) return;
-    if(t.dataset.act==='toggle'){ const task=c.tasks.find(x=>x.id===t.dataset.task); task.done=t.checked; save(); renderTasks(); }
-    if(t.dataset.act==='cat-rename'){ const v=t.value.trim(); if(v){ c.name=v; save(); } renderTasks(); }
+    if(t.dataset.act==='toggle'){ const task=c.tasks.find(x=>x.id===t.dataset.task); task.done=t.checked; save(); renderTasks(); renderSchedule(); }
+    if(t.dataset.act==='link'){ const task=c.tasks.find(x=>x.id===t.dataset.task); task.eventId=t.value||undefined; linkingTask=null; save(); renderTasks(); renderSchedule(); }
+    if(t.dataset.act==='cat-rename'){ renameCategory(c.name, t.value); state=loadDay(cur); renderTasks(); }
   });
   cats.addEventListener('keydown', e=>{ if(e.target.dataset.act==='cat-rename' && e.key==='Enter'){ e.preventDefault(); e.target.blur(); } });
   cats.addEventListener('click', e=>{
     const b=e.target.closest('button[data-act]'); if(!b) return;
     const c=findCat(b.dataset.cat);
-    if(b.dataset.act==='task-del'){ c.tasks=c.tasks.filter(x=>x.id!==b.dataset.task); save(); renderTasks(); }
-    if(b.dataset.act==='cat-del'){ if(!c.tasks.length){ state.categories=state.categories.filter(x=>x!==c); save(); } else confirmCat=c.id; renderTasks(); }
-    if(b.dataset.act==='cat-del-yes'){ state.categories=state.categories.filter(x=>x.id!==b.dataset.cat); confirmCat=null; save(); renderTasks(); }
+    if(b.dataset.act==='task-del'){ c.tasks=c.tasks.filter(x=>x.id!==b.dataset.task); save(); renderTasks(); renderSchedule(); }
+    if(b.dataset.act==='link-open'){ linkingTask=b.dataset.task; renderTasks(); document.getElementById('link-'+linkingTask)?.focus(); }
+    if(b.dataset.act==='link-close'){ linkingTask=null; renderTasks(); }
+    if(b.dataset.act==='cat-del'){ if(tasksToDelete(c.name)){ confirmCat=c.id; } else { deleteCategory(c.name); state=loadDay(cur); } renderTasks(); renderSchedule(); }
+    if(b.dataset.act==='cat-del-yes'){ deleteCategory(c.name); confirmCat=null; state=loadDay(cur); renderTasks(); renderSchedule(); }
     if(b.dataset.act==='cat-del-no'){ confirmCat=null; renderTasks(); }
   });
   cats.addEventListener('submit', e=>{
     e.preventDefault();
-    const form=e.target, c=findCat(form.dataset.cat), input=form.querySelector('input');
+    const form=e.target, c=findCat(form.dataset.cat), input=form.querySelector('input'), pick=form.querySelector('select');
     const v=input.value.trim(); if(!v||!c) return;
-    c.tasks.push({id:uid(), text:v, done:false}); save(); renderTasks();
+    c.tasks.push({id:uid(), text:v, done:false, eventId: pick && pick.value ? pick.value : undefined});
+    save(); renderTasks(); renderSchedule();
     document.getElementById('add-'+c.id)?.focus();
   });
   document.getElementById('addCatForm').addEventListener('submit', e=>{
     e.preventDefault(); const i=document.getElementById('newCatName'); const v=i.value.trim(); if(!v) return;
-    const c={id:uid(), name:v, tasks:[]}; state.categories.push(c); i.value=''; save(); renderTasks();
-    document.getElementById('add-'+c.id)?.focus();
+    if(!addCategory(v)) return;
+    i.value=''; state=loadDay(cur); renderTasks();
+    const c=state.categories.find(x=>sameName(x.name,v));
+    if(c) document.getElementById('add-'+c.id)?.focus();
   });
 
   // ---------- navigation ----------
-  function go(date){ cur=date; state=loadDay(cur); confirmCat=null; resetForm(); renderAll(); scrollToMorning(); }
+  function go(date){ cur=date; state=loadDay(cur); confirmCat=null; linkingTask=null; resetForm(); renderAll(); scrollToMorning(); }
   function scrollToMorning(){
     const hourPx=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--hour'))||56;
     let h=8; if(cur===todayIso()){ h=Math.max(START_H, new Date().getHours()-1); }
-    if(state.events.length){ h=Math.min(h, Math.floor(Math.min(...state.events.map(e=>toMin(e.start)))/60)); }
+    const evs=dayEvents(); if(evs.length){ h=Math.min(h, Math.floor(Math.min(...evs.map(e=>toMin(e.start)))/60)); }
     document.getElementById('tlScroll').scrollTop=(Math.max(h,START_H)-START_H)*hourPx;
   }
-  prevDay.onclick=()=>go(shift(cur,-1));
-  nextDay.onclick=()=>go(shift(cur,1));
-  todayBtn.onclick=()=>go(todayIso());
-  datePick.onchange=e=>{ if(e.target.value) go(e.target.value); };
+  // The arrows move one day in the Day tab and one week in the Week tab.
+  function jump(date){ cur=date; refresh(); }
+  prevDay.onclick=()=>jump(shift(cur, view==='week'?-7:-1));
+  nextDay.onclick=()=>jump(shift(cur, view==='week'?7:1));
+  todayBtn.onclick=()=>jump(todayIso());
+  datePick.onchange=e=>{ if(e.target.value) jump(e.target.value); };
 
-  setInterval(()=>{ if(cur===todayIso()) renderSchedule(); }, 60000);
-  go(cur);
+  // If the planner stays open past midnight, or is reopened on a later day, roll tasks forward.
+  let lastToday = todayIso();
+  function checkNewDay(){
+    const t = todayIso();
+    if(t===lastToday) return false;
+    if(cur===lastToday) cur = t;
+    lastToday = t; rollDays(); rollWeeks(); refresh();
+    return true;
+  }
+  document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) checkNewDay(); });
+  setInterval(()=>{ if(!checkNewDay() && view==='day' && cur===todayIso()) renderSchedule(); }, 60000);
+
+  initCats();
+  rollDays();
+  rollWeeks();
+  setView(view);
 })();
 </script>
 </body>
