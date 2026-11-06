@@ -887,10 +887,9 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
   });
 
   // ---------- Mindfulness Corner ----------
-  // Up to 5 active categories (dayplanner:mindful, as [{id, name, from, removedFrom}]).
+  // Any number of categories (dayplanner:mindful, as [{id, name, from, removedFrom}]).
   // from = the week it was added. removedFrom = the week it was deleted; earlier weeks keep it and its stars.
   // Filled stars are saved per week (dayplanner:stars:<Monday>, as {categoryId:[dates]}).
-  const MAX_MINDFUL = 5;
   const STAR = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.2l2.7 5.6 6.1.8-4.5 4.2 1.2 6.1-5.5-3-5.5 3 1.2-6.1-4.5-4.2 6.1-.8z"/></svg>';
   const WEEK_LETTERS = ['M','T','W','T','F','S','S'];
   let mindful = [];
@@ -920,7 +919,7 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
   }
   function renderMindful(){
     const today = todayIso(), stars = loadStars(weekMonday), pastWeek = weekMonday<mondayOf(today);
-    const shown = mindful.filter(m=>showsInWeek(m,weekMonday)), active = activeMindful().length;
+    const shown = mindful.filter(m=>showsInWeek(m,weekMonday));
     const dates = Array.from({length:7},(_,i)=>shift(weekMonday,i));
     const rows = shown.map(m=>{
       if(confirmMindful===m.id){
@@ -942,10 +941,10 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
     const head = `<div class="star-row head" aria-hidden="true"><span class="spacer"></span>${dates.map((d,i)=>`<span class="star-letter${d===today?' today':''}">${WEEK_LETTERS[i]}</span>`).join('')}<span class="spacer"></span></div>`;
     document.getElementById('mindfulBlock').innerHTML = `<section class="col mindful" aria-labelledby="mindfulH">
       <div class="col-head">
-        <div class="weekly-title"><h2 class="col-title" id="mindfulH">Mindfulness Corner</h2>${pastWeek ? '' : `<span class="col-meta">${active} of ${MAX_MINDFUL}</span>`}</div>
-        ${!pastWeek && active<MAX_MINDFUL ? `<form class="wadd-cat" id="mAdd"><input type="text" id="mNew" placeholder="New category name" aria-label="New mindfulness category name" maxlength="40"><button class="btn" type="submit">Add category</button></form>` : ''}
+        <div class="weekly-title"><h2 class="col-title" id="mindfulH">Mindfulness Corner</h2></div>
+        ${!pastWeek ? `<form class="wadd-cat" id="mAdd"><input type="text" id="mNew" placeholder="New category name" aria-label="New mindfulness category name" maxlength="40"><button class="btn" type="submit">Add category</button></form>` : ''}
       </div>
-      ${shown.length ? `<div class="stars-grid">${head}${rows}</div>` : `<p class="empty">${pastWeek ? 'No mindfulness categories this week.' : `Add up to ${MAX_MINDFUL} categories, then fill in a star on each day you complete one.`}</p>`}
+      ${shown.length ? `<div class="stars-grid">${head}${rows}</div>` : `<p class="empty">${pastWeek ? 'No mindfulness categories this week.' : 'Add a category, then fill in a star on each day you complete it.'}</p>`}
     </section>`;
   }
   const mindEl = document.getElementById('mindfulBlock');
@@ -978,7 +977,6 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
     e.preventDefault();
     const v=document.getElementById('mNew').value.trim(); if(!v) return;
     if(mindfulExists(v)){ notify(`You already have a mindfulness category called “${v}”.`); return; }
-    if(activeMindful().length>=MAX_MINDFUL) return;
     mindful.push({id:uid(), name:v, from:mondayOf(todayIso())}); saveMindful(); renderMindful();
     document.getElementById('mNew')?.focus();
   });
