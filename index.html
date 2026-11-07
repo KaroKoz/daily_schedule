@@ -77,11 +77,26 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
 .task{flex-wrap:wrap}
 .link-row{flex-basis:100%;padding-left:28px;display:flex;align-items:center;gap:6px;margin-top:-2px}
 .ev-chip{display:inline-flex;align-items:center;gap:6px;max-width:100%;border:0;border-left:3px solid var(--c);background:var(--cbg);border-radius:5px;padding:2px 8px;font-size:12px;text-align:left}
-.ev-chip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.ev-chip{flex-wrap:wrap;row-gap:0}
+.ev-chip span{min-width:0;overflow-wrap:anywhere}
 .ev-chip .when{font-family:var(--f-mono);font-size:11px;opacity:.8;flex:none}
 .ev-chip:hover{outline:1px solid var(--c)}
 .task.done .ev-chip{opacity:.6}
-.link-row select{font-size:13px;border:1px solid var(--line);border-radius:6px;padding:4px 6px;background:var(--surface);max-width:100%;min-width:0}
+.link-row{flex-wrap:wrap}
+/* Event picker: a small button that opens a list inside the page, so long names wrap */
+.pick-btn{flex:none;display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:3px 8px;font-size:12px;color:var(--muted);max-width:100%;text-align:left}
+.pick-btn:hover,.pick-btn[aria-expanded="true"]{border-color:var(--muted);color:var(--ink)}
+.pick-btn svg{width:13px;height:13px;flex:none}
+.pick-btn.chosen{flex:0 1 auto;border:0;border-left:3px solid var(--c);background:var(--cbg);color:var(--ink);overflow-wrap:anywhere}
+.ev-pick{flex-basis:100%;min-width:0;border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:4px;display:flex;flex-direction:column;gap:1px;max-height:260px;overflow-y:auto;margin-top:4px}
+.pk-day{font-family:var(--f-mono);font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:6px 6px 2px}
+.pk-opt{display:flex;align-items:baseline;gap:7px;width:100%;border:0;background:transparent;border-radius:5px;padding:5px 6px;font-size:13px;line-height:1.3;text-align:left;min-width:0}
+.pk-opt:hover{background:var(--soft)}
+.pk-opt[aria-pressed="true"]{background:var(--soft);font-weight:600}
+.pk-opt .dot{flex:none;width:8px;height:8px;border-radius:50%;background:var(--c);transform:translateY(-1px)}
+.pk-opt .tm{flex:none;font-family:var(--f-mono);font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.pk-opt .t{min-width:0;overflow-wrap:anywhere}
+.pk-none{color:var(--muted)}
 .icon-btn svg{width:15px;height:15px}
 .carry{font-family:var(--f-mono);font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:4px;padding:0 5px;margin-left:6px;white-space:nowrap}
 .event .loc{font-size:11px;opacity:.85;overflow-wrap:anywhere}
@@ -103,8 +118,6 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
 .add-task input{flex:1;min-width:0;border:0;border-bottom:1px dashed var(--line);background:transparent;padding:6px 0;font-size:14px}
 .add-task input:focus{outline:none;border-bottom-color:var(--accent)}
 .add-task{flex-wrap:wrap;align-items:center}
-.add-task select{flex:0 1 auto;max-width:100%;min-width:0;font-size:13px;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:4px 6px;background:var(--surface)}
-.add-task select:focus{color:var(--ink)}
 .add-cat{display:flex;gap:8px}
 .add-cat input{flex:1;min-width:0;border:1px solid var(--line);background:var(--soft);border-radius:8px;padding:7px 10px}
 .empty{color:var(--muted);font-size:14px;margin:0}
@@ -162,6 +175,16 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
 
 /* Up Next: reminder panel under the Day tab's Tasks panel */
 .day-left{display:flex;flex-direction:column;gap:18px;min-width:0}
+/* Up Next opens and closes from its header */
+.up-head-wrap{margin:0;font:inherit}
+.up-toggle{width:100%;display:flex;align-items:center;gap:10px;border:0;background:transparent;padding:16px 18px;text-align:left;border-radius:14px}
+.up-toggle:hover{background:var(--soft)}
+.up-toggle[aria-expanded="true"]{border-bottom:1px solid var(--line);border-radius:14px 14px 0 0}
+.up-title{flex:1;font-family:var(--f-display);font-weight:400;font-size:22px}
+.up-toggle .meta{font-family:var(--f-mono);font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.chev{width:18px;height:18px;flex:none;fill:none;stroke:var(--muted);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.up-toggle[aria-expanded="true"] .chev{transform:rotate(180deg)}
+@media (prefers-reduced-motion:no-preference){.chev{transition:transform .2s}}
 .up-day{display:flex;flex-direction:column;gap:3px;min-width:0}
 .up-open{align-self:flex-start;border:0;background:transparent;padding:0;font-family:var(--f-mono);font-size:12px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;border-radius:4px}
 .up-open:hover{text-decoration:underline}
@@ -336,8 +359,12 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
     </section>
 
     <section class="panel upcoming" aria-labelledby="upcomingH">
-      <div class="panel-head"><h2 id="upcomingH">Up Next</h2><span class="meta">Next 3 days</span></div>
-      <div class="panel-body" id="upcoming" style="gap:12px"></div>
+      <h2 class="up-head-wrap"><button class="up-toggle" type="button" id="upToggle" aria-expanded="false" aria-controls="upcoming">
+        <span class="up-title" id="upcomingH">Up Next</span>
+        <span class="meta" id="upSummary">Next 3 days</span>
+        <svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+      </button></h2>
+      <div class="panel-body" id="upcoming" style="gap:12px" hidden></div>
     </section>
     </div>
 
@@ -592,7 +619,9 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
         if(t.done || t.movedTo || t.rollSkip) return;
         target = target || loadDay(today);
         addToCategory(target, c.name, {id:uid(), text:t.text, done:false, from:t.from||d,
-          eventId: seriesOn(today).some(r=>r.id===t.eventId) ? t.eventId : undefined});
+          ...(t.eventDate
+            ? (t.eventDate>=today ? {eventId:t.eventId, eventDate:t.eventDate} : {})
+            : {eventId: seriesOn(today).some(r=>r.id===t.eventId) ? t.eventId : undefined})});
         t.movedTo = today; changed = true;
       }));
       if(changed) storeSet(PREFIX+'day:'+d, JSON.stringify(day));
@@ -661,26 +690,76 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
   }
 
   // ---------- task ↔ event links ----------
-  // A task can carry an eventId pointing at one of the day's events (one-time or weekly).
+  // A task can carry an eventId pointing at an event on its own day, or, with eventDate,
+  // at an event up to a week later (LINK_DAYS). eventDate is left out for same-day links.
   let linkingTask = null;   // id of the task whose event picker is open
   const LINK_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.5-1.5"/></svg>';
+  const LINK_DAYS = 7;
   const sortedEvents = () => dayEvents().sort((a,b)=>toMin(a.start)-toMin(b.start));
-  const linkedEvent = t => t.eventId ? dayEvents().find(e=>e.id===t.eventId) : null;
-  const tasksFor = evId => state.categories.flatMap(c=>c.tasks).filter(t=>t.eventId===evId && !t.movedTo);
+  const eventsFor = date => date===cur ? sortedEvents() : eventsOn(date);
+  const linkDate = t => t.eventDate || cur;
+  const linkedEvent = t => t.eventId ? eventsFor(linkDate(t)).find(e=>e.id===t.eventId) : null;
+  // Tasks linked to an event on the day on screen: from this day, plus prep tasks from the week before.
+  function tasksFor(evId){
+    const here = state.categories.flatMap(c=>c.tasks).filter(t=>t.eventId===evId && linkDate(t)===cur && !t.movedTo);
+    const before = [];
+    for(let i=1; i<=LINK_DAYS; i++){
+      const day = readStored('day', shift(cur,-i));
+      ((day && day.categories) || []).forEach(c=>c.tasks.forEach(t=>{ if(t.eventId===evId && t.eventDate===cur && !t.movedTo) before.push(t); }));
+    }
+    return [...here, ...before];
+  }
+  const dayLabel = d => fromIso(d).toLocaleDateString(undefined,{weekday:'short', month:'short', day:'numeric'});
+  // Event choices from the day on screen through a week ahead, grouped by date.
+  // Each value is "date|eventId". Drawn as buttons (not a <select>) so long names wrap.
+  function hasLinkChoices(){
+    for(let i=0; i<=LINK_DAYS; i++) if(eventsFor(shift(cur,i)).length) return true;
+    return false;
+  }
+  function pickList(selected, act, attrs){
+    let html = `<button type="button" class="pk-opt pk-none" data-act="${act}" ${attrs} data-value="" aria-pressed="${!selected}">No event</button>`;
+    for(let i=0; i<=LINK_DAYS; i++){
+      const d = shift(cur,i), evs = eventsFor(d); if(!evs.length) continue;
+      html += `<div class="pk-day">${i===0?'This day':dayLabel(d)}</div>` + evs.map(e=>{
+        const v = `${d}|${e.id}`, c = e.color||'blue';
+        return `<button type="button" class="pk-opt" data-act="${act}" ${attrs} data-value="${v}" aria-pressed="${v===selected}" style="--c:var(--ev-${c}-b)" aria-label="${esc(e.title)}, ${dayLabel(d)} at ${fmt(e.start)}"><span class="dot"></span><span class="tm">${fmt(e.start)}</span><span class="t">${esc(e.title)}</span></button>`;
+      }).join('');
+    }
+    return `<div class="ev-pick" role="group" aria-label="Choose an event">${html}</div>`;
+  }
+  function eventFromValue(value){
+    if(!value) return null;
+    const [d, id] = value.split('|'), e = eventsFor(d).find(x=>x.id===id);
+    return e ? {e, d} : null;
+  }
+  // The add-a-task picker remembers its choice per category until the task is added.
+  let addPick = {};
+  function addPickButton(cid){
+    const hit = eventFromValue(addPick[cid]);
+    if(!hit) return `<button type="button" class="pick-btn" data-act="add-pick-toggle" data-cat="${cid}" aria-expanded="false" title="Link the new task to an event">${LINK_ICON}Event</button>`;
+    const c = hit.e.color||'blue';
+    return `<button type="button" class="pick-btn chosen" data-act="add-pick-toggle" data-cat="${cid}" aria-expanded="false" style="--c:var(--ev-${c}-b);--cbg:var(--ev-${c})" title="Change the linked event">${esc(hit.e.title)} · ${hit.d!==cur?dayLabel(hit.d)+' · ':''}${fmt(hit.e.start)}</button>`;
+  }
+  function applyLink(task, value){
+    delete task.eventId; delete task.eventDate;
+    if(!value) return;
+    const [d, id] = value.split('|');
+    task.eventId = id;
+    if(d!==cur) task.eventDate = d;
+  }
   function linkRow(c,t){
     const ids = `data-cat="${c.id}" data-task="${t.id}"`;
     if(linkingTask===t.id){
-      const evs = sortedEvents();
-      const opts = evs.length
-        ? `<option value="">No event</option>` + evs.map(e=>`<option value="${e.id}" ${e.id===t.eventId?'selected':''}>${fmt(e.start)} · ${esc(e.title)}</option>`).join('')
-        : `<option value="">No events on this day yet</option>`;
-      return `<div class="link-row"><select data-act="link" ${ids} id="link-${t.id}" aria-label="Link this task to an event">${opts}</select>
-        <button class="btn ghost" type="button" data-act="link-close" ${ids}>Done</button></div>`;
+      const list = hasLinkChoices()
+        ? pickList(t.eventId ? `${linkDate(t)}|${t.eventId}` : '', 'link-set', ids)
+        : '<span class="up-none">No events in the next week yet.</span>';
+      return `<div class="link-row" id="link-${t.id}">${list}
+        <button class="btn ghost" type="button" data-act="link-close" ${ids}>Cancel</button></div>`;
     }
     const ev = linkedEvent(t);
     if(!ev) return '';
-    return `<div class="link-row"><button type="button" class="ev-chip" data-act="link-open" ${ids} style="--c:var(--ev-${ev.color||'blue'}-b);--cbg:var(--ev-${ev.color||'blue'})" title="Change or remove the linked event" aria-label="Linked to ${esc(ev.title)} at ${fmt(ev.start)}. Change">
-      <span>${esc(ev.title)}</span><span class="when">${fmt(ev.start)}</span></button></div>`;
+    return `<div class="link-row"><button type="button" class="ev-chip" data-act="link-open" ${ids} style="--c:var(--ev-${ev.color||'blue'}-b);--cbg:var(--ev-${ev.color||'blue'})" title="Change or remove the linked event" aria-label="Linked to ${esc(ev.title)}${linkDate(t)!==cur?' on '+dayLabel(linkDate(t)):''} at ${fmt(ev.start)}. Change">
+      <span>${esc(ev.title)}</span><span class="when">${linkDate(t)!==cur?dayLabel(linkDate(t))+' · ':''}${fmt(ev.start)}</span></button></div>`;
   }
 
   // ---------- render: tasks ----------
@@ -688,7 +767,7 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
     const box = document.getElementById('cats');
     let total=0, done=0;
     // event choices for the "add a task" pickers
-    const evOpts = sortedEvents().map(e=>`<option value="${e.id}">${fmt(e.start)} · ${esc(e.title)}</option>`).join('');
+    const canLink = hasLinkChoices();
     if(!state.categories.length){ box.innerHTML = '<p class="empty">No categories yet. Add one below to start listing tasks.</p>'; }
     else box.innerHTML = state.categories.map(c=>{
       const live=c.tasks.filter(t=>!t.movedTo), n=live.length, k=live.filter(t=>t.done).length; total+=n; done+=k;
@@ -713,7 +792,7 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
           </li>`).join('')}</ul>
         ${shared ? `<form class="add-task" data-cat="${c.id}">
           <input type="text" placeholder="+ Add a task" aria-label="Add a task to ${esc(c.name)}" maxlength="140" id="add-${c.id}">
-          ${evOpts ? `<select id="addlink-${c.id}" aria-label="Link the new task to an event"><option value="">No event</option>${evOpts}</select>` : ''}
+          ${canLink ? addPickButton(c.id) + `<div hidden data-pick-for="${c.id}" style="flex-basis:100%;min-width:0">${pickList(addPick[c.id]||'', 'add-pick-set', `data-cat="${c.id}"`).replace('class="ev-pick"','class="ev-pick" style="margin-top:6px"')}</div>` : ''}
         </form>` : ''}
       </div>`;
     }).join('');
@@ -984,7 +1063,7 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
   // ---------- render: up next panel ----------
   // The three days after the day on screen, with tasks and events listed separately.
   function renderUpcoming(){
-    let taskHtml = '', eventHtml = '';
+    let taskHtml = '', eventHtml = '', nTasks = 0, nEvents = 0;
     for(let i=1; i<=3; i++){
       const date = shift(cur,i), dt = fromIso(date);
       const label = dt.toLocaleDateString(undefined,{weekday:'short', month:'short', day:'numeric'});
@@ -993,6 +1072,7 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
       const day = readStored('day',date);
       const tasks = ((day && day.categories) || []).flatMap(c=>c.tasks).filter(t=>!t.done && !t.movedTo);
       const events = eventsOn(date);
+      nTasks += tasks.length; nEvents += events.length;
       if(tasks.length) taskHtml += block(tasks.map(t=>`<li class="up-item tk"><span class="mark"></span><span class="tx">${esc(t.text)}</span></li>`).join(''));
       if(events.length) eventHtml += block(events.map(e=>`<li class="up-item ev" style="--c:var(--ev-${e.color||'blue'}-b)"><span class="mark" title="${COLOR_NAMES[e.color||'blue']}"></span><span class="tm">${fmt(e.start)}</span><span class="tx">${esc(e.title)}</span></li>`).join(''));
     }
@@ -1002,7 +1082,22 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
           <section class="up-sec" aria-labelledby="upEventsH"><h3 id="upEventsH">Events</h3>${eventHtml || '<p class="up-none">No events</p>'}</section>
         </div>`
       : '<p class="up-none">All clear for the next few days!</p>';
+    // While closed, the header shows a short count so it still works as a reminder.
+    const plural = (n,w) => `${n} ${w}${n===1?'':'s'}`;
+    const parts = [nTasks && plural(nTasks,'task'), nEvents && plural(nEvents,'event')].filter(Boolean);
+    document.getElementById('upSummary').textContent = upOpen ? 'Next 3 days' : (parts.length ? parts.join(' · ') : 'All clear');
   }
+  // Open or closed is remembered in this browser. It starts closed.
+  let upOpen = storeGet(PREFIX+'upNextOpen')==='1';
+  function setUpOpen(open){
+    upOpen = open; storeSet(PREFIX+'upNextOpen', open ? '1' : '0');
+    document.getElementById('upcoming').hidden = !open;
+    document.getElementById('upToggle').setAttribute('aria-expanded', open);
+    renderUpcoming();
+  }
+  document.getElementById('upcoming').hidden = !upOpen;
+  document.getElementById('upToggle').setAttribute('aria-expanded', upOpen);
+  document.getElementById('upToggle').addEventListener('click', ()=>setUpOpen(!upOpen));
   document.getElementById('upcoming').addEventListener('click', e=>{
     const b = e.target.closest('[data-date]'); if(!b) return;
     go(b.dataset.date); window.scrollTo(0,0);
@@ -1168,15 +1263,37 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
   cats.addEventListener('change', e=>{
     const t=e.target, c=findCat(t.dataset.cat); if(!c) return;
     if(t.dataset.act==='toggle'){ const task=c.tasks.find(x=>x.id===t.dataset.task); task.done=t.checked; save(); renderTasks(); renderSchedule(); }
-    if(t.dataset.act==='link'){ const task=c.tasks.find(x=>x.id===t.dataset.task); task.eventId=t.value||undefined; linkingTask=null; save(); renderTasks(); renderSchedule(); }
     if(t.dataset.act==='cat-rename'){ renameCategory(c.name, t.value); state=loadDay(cur); renderTasks(); }
   });
-  cats.addEventListener('keydown', e=>{ if(e.target.dataset.act==='cat-rename' && e.key==='Enter'){ e.preventDefault(); e.target.blur(); } });
+  cats.addEventListener('keydown', e=>{
+    if(e.target.dataset.act==='cat-rename' && e.key==='Enter'){ e.preventDefault(); e.target.blur(); }
+    if(e.key==='Escape'){
+      // Escape closes an open event picker.
+      const box = e.target.closest('[data-pick-for]');
+      if(box){ box.hidden = true; const t = box.closest('form').querySelector('[data-act="add-pick-toggle"]'); t.setAttribute('aria-expanded','false'); t.focus(); }
+      else if(linkingTask){ const id = linkingTask; linkingTask = null; renderTasks(); }
+    }
+  });
   cats.addEventListener('click', e=>{
     const b=e.target.closest('button[data-act]'); if(!b) return;
     const c=findCat(b.dataset.cat);
     if(b.dataset.act==='task-del'){ c.tasks=c.tasks.filter(x=>x.id!==b.dataset.task); save(); renderTasks(); renderSchedule(); }
-    if(b.dataset.act==='link-open'){ linkingTask=b.dataset.task; renderTasks(); document.getElementById('link-'+linkingTask)?.focus(); }
+    if(b.dataset.act==='link-open'){ linkingTask=b.dataset.task; renderTasks(); document.querySelector(`#link-${linkingTask} .pk-opt[aria-pressed="true"]`)?.focus(); }
+    if(b.dataset.act==='link-set'){ const task=c.tasks.find(x=>x.id===b.dataset.task); applyLink(task, b.dataset.value); linkingTask=null; save(); renderTasks(); renderSchedule(); }
+    if(b.dataset.act==='add-pick-toggle'){
+      // Shown and hidden in place so text typed in the add box isn't lost.
+      const box = cats.querySelector(`[data-pick-for="${b.dataset.cat}"]`), open = box.hidden;
+      box.hidden = !open; b.setAttribute('aria-expanded', open);
+      if(open) box.querySelector('.pk-opt[aria-pressed="true"]')?.focus();
+    }
+    if(b.dataset.act==='add-pick-set'){
+      const cid = b.dataset.cat; addPick[cid] = b.dataset.value || undefined;
+      const form = b.closest('form'), box = form.querySelector('[data-pick-for]');
+      form.querySelector('[data-act="add-pick-toggle"]').outerHTML = addPickButton(cid);
+      box.hidden = true;
+      box.querySelectorAll('.pk-opt').forEach(o=>o.setAttribute('aria-pressed', (o.dataset.value||'')===(addPick[cid]||'')));
+      document.getElementById('add-'+cid)?.focus();
+    }
     if(b.dataset.act==='link-close'){ linkingTask=null; renderTasks(); }
     if(b.dataset.act==='cat-del'){ if(tasksToDelete(c.name)){ confirmCat=c.id; } else { deleteCategory(c.name); state=loadDay(cur); } renderTasks(); renderSchedule(); }
     if(b.dataset.act==='cat-del-yes'){ deleteCategory(c.name); confirmCat=null; state=loadDay(cur); renderTasks(); renderSchedule(); }
@@ -1184,9 +1301,11 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
   });
   cats.addEventListener('submit', e=>{
     e.preventDefault();
-    const form=e.target, c=findCat(form.dataset.cat), input=form.querySelector('input'), pick=form.querySelector('select');
+    const form=e.target, c=findCat(form.dataset.cat), input=form.querySelector('input');
     const v=input.value.trim(); if(!v||!c) return;
-    c.tasks.push({id:uid(), text:v, done:false, eventId: pick && pick.value ? pick.value : undefined});
+    const task = {id:uid(), text:v, done:false}; applyLink(task, eventFromValue(addPick[c.id]) ? addPick[c.id] : '');
+    delete addPick[c.id];
+    c.tasks.push(task);
     save(); renderTasks(); renderSchedule();
     document.getElementById('add-'+c.id)?.focus();
   });
@@ -1199,7 +1318,7 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
   });
 
   // ---------- navigation ----------
-  function go(date){ cur=date; state=loadDay(cur); confirmCat=null; linkingTask=null; resetForm(); renderAll(); scrollToMorning(); }
+  function go(date){ cur=date; state=loadDay(cur); confirmCat=null; linkingTask=null; addPick={}; resetForm(); renderAll(); scrollToMorning(); }
   function scrollToMorning(){
     const hourPx=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--hour'))||56;
     let h=8; if(cur===todayIso()){ h=Math.max(START_H, new Date().getHours()-1); }
